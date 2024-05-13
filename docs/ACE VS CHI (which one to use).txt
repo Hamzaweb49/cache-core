@@ -1,0 +1,23 @@
+AMBA ACE (AXI Coherency Extensions) and AMBA CHI (Cache Coherent Interconnect) are both protocols developed by ARM for cache coherency in multi-core systems, but they have some differences in their design and features:
+
+1. Purpose:
+ACE (AXI Coherency Extensions): ACE extends the AXI protocol to support cache coherency. It adds additional features to AXI to enable coherent memory transactions and cache maintenance operations.
+CHI (Cache Coherent Interconnect): CHI is a standalone cache coherent interconnect protocol designed specifically for multi-core systems. It provides built-in support for cache coherence without relying on extensions to other protocols.
+2. Protocol Integration:
+ACE: ACE integrates cache coherence features into the existing AXI protocol, allowing AXI-based systems to support cache coherence through extensions.
+CHI: CHI is a standalone protocol dedicated to cache coherence. It does not rely on integrating coherence features into another protocol and provides native support for cache coherence.
+3. Flexibility:
+ACE: ACE provides some level of flexibility by extending the existing AXI protocol. However, it may have limitations compared to CHI in terms of configurability and optimization for cache coherence.
+CHI: CHI offers greater flexibility and configurability specifically tailored for cache coherence in multi-core systems. It allows designers to customize coherence mechanisms, cache line sizes, and other parameters to optimize system performance and efficiency.
+4. Scalability:
+ACE: ACE extends the scalability of the AXI protocol to support cache coherence in multi-core systems. However, it may face scalability challenges in extremely large multi-core systems due to its transaction-based approach.
+CHI: CHI is designed for large-scale multi-core systems with optimized scalability. It offers low latency and high bandwidth communication between cores while efficiently managing cache coherence across the entire system.
+5. Adoption and Ecosystem:
+ACE: ACE has been widely adopted by ARM and other semiconductor vendors, especially in ARM-based SoC designs. It benefits from an established ecosystem of tools, IP cores, and software support.
+CHI: CHI is a newer protocol and may have limited adoption compared to ACE. Its adoption may depend on vendor support and ecosystem maturity.
+
+Which to Use:
+The choice between AMBA ACE and CHI depends on various factors such as system requirements, performance goals, design constraints, and compatibility with existing hardware and software:
+
+If you are working with an existing AXI-based system and need to add cache coherence support, ACE may be a suitable choice.
+If you are designing a new multi-core system or require optimized cache coherence with flexibility and scalability, CHI may be more appropriate.
