@@ -1,0 +1,199 @@
+<mxfile host="app.diagrams.net" modified="2024-06-15T16:07:52.254Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36" etag="KJazkmpT3OkYzK4eSRvj" version="24.5.4" type="github">
+  <diagram name="Page-1" id="3AUZKAt3B8JR4SH2fnT8">
+    <mxGraphModel dx="3176" dy="1816" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-1" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="410" width="110" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-2" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="950" width="110" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-3" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="1750" y="1340" width="110" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-4" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="650" y="1340" width="110" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-5" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="1230" y="1900" width="110" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-6" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Invalid&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1225" y="450" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-7" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Unique&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size: 18px;&quot;&gt;Clean&lt;/font&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1225" y="990" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-8" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Unique Dirty&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1775" y="1380" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-9" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Shared&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="675" y="1380" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-10" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Shared&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size: 18px;&quot;&gt;Dirty&lt;/font&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1255" y="1940" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-11" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="jOLuExsDwOuBf2Oc7_jj-1" target="jOLuExsDwOuBf2Oc7_jj-2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1200" y="720" as="sourcePoint" />
+            <mxPoint x="1250" y="670" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-12" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;ARADDR, ARVALID = 1,&lt;/font&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;ACSNOOP = READONCE&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;/&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;ARREADY = 1, RDATA, RRESP=OKAY, ACREADY=1, RVALID=1, CRVALID=1, CDATA = DATA, CDVALID = 1&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1260" y="720" width="240" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-13" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;AWADDR, AWVALID = 1,&lt;/font&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;ACSNOOP = WRITELINEUNIQUE&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;/&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;AWREADY = 1, RDATA = 0, BRESP=OKAY, WREADY=1, BVALID = 1&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1730" y="770" width="285" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-14" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="jOLuExsDwOuBf2Oc7_jj-1" target="jOLuExsDwOuBf2Oc7_jj-3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1310" y="470" as="sourcePoint" />
+            <mxPoint x="1360" y="420" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1520" y="540" />
+              <mxPoint x="1680" y="710" />
+              <mxPoint x="1805" y="1030" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-15" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="jOLuExsDwOuBf2Oc7_jj-3" target="jOLuExsDwOuBf2Oc7_jj-1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1920" y="1390" as="sourcePoint" />
+            <mxPoint x="1970" y="524.0000152587891" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="2060" y="1280" />
+              <mxPoint x="2160" y="1060" />
+              <mxPoint x="2110" y="640" />
+              <mxPoint x="1950" y="510" />
+              <mxPoint x="1800" y="390" />
+              <mxPoint x="1590" y="390" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-16" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;AWADDR, AWVALID = 1,&lt;/font&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;ACSNOOP = MAKEINVALID&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;/&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;AWREADY = 1, BRESP=OKAY, C&lt;/span&gt;&lt;span style=&quot;font-size: 18px; background-color: initial;&quot;&gt;RESP=OKAY,&lt;/span&gt;&lt;span style=&quot;font-size: 18px; background-color: initial;&quot;&gt;&amp;nbsp;CRVALID&lt;/span&gt;&lt;span style=&quot;background-color: initial; font-size: 18px;&quot;&gt;=1, CDVALID = 1&amp;nbsp;&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="2060" y="1330" width="285" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-17" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.027;entryY=0.318;entryDx=0;entryDy=0;entryPerimeter=0;exitX=1;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="jOLuExsDwOuBf2Oc7_jj-2" target="jOLuExsDwOuBf2Oc7_jj-3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1250" y="980" as="sourcePoint" />
+            <mxPoint x="1300" y="930" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-18" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;AWADDR, ARVALID = 1,&lt;/font&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;ACSNOOP = WRITELINEUNIQUE&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;/&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;AWREADY = 1, RDATA = 0, RRESP = 0, CRRESP=0, RVALID=0, CRVALID=0,&amp;nbsp;&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1315" y="1320" width="345" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-19" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="jOLuExsDwOuBf2Oc7_jj-2" target="jOLuExsDwOuBf2Oc7_jj-4">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="950" y="1290" as="sourcePoint" />
+            <mxPoint x="1000" y="1240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-20" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;ARADDR, ARVALID = 1,&lt;/font&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;ACSNOOP = READONCE&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;/&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;AWREADY = 1, RDATA , RRESP = OKAY,&amp;nbsp; RVALID=1, CDDATA = DATA FROM CACHELINE, CRRESP = OKAY, RRESP = OKAY&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="780" y="1320" width="410" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-21" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="jOLuExsDwOuBf2Oc7_jj-4" target="jOLuExsDwOuBf2Oc7_jj-1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="700" y="1270" as="sourcePoint" />
+            <mxPoint x="750" y="1220" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="640" y="1210" />
+              <mxPoint x="630" y="1030" />
+              <mxPoint x="740" y="770" />
+              <mxPoint x="940" y="560" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-22" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;AWADDR, AWVALID = 1,&lt;/font&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;ACSNOOP = MAKEINVALID&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;/&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;AWREADY = 1, RDATA = 0,&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;RLAST = 1&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="760" y="805" width="285" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-23" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="jOLuExsDwOuBf2Oc7_jj-4" target="jOLuExsDwOuBf2Oc7_jj-5">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="690" y="1505" as="sourcePoint" />
+            <mxPoint x="1185" y="2380" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="810" y="1810" />
+              <mxPoint x="1000" y="1940" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-24" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="jOLuExsDwOuBf2Oc7_jj-3" target="jOLuExsDwOuBf2Oc7_jj-5">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1810" y="1465" as="sourcePoint" />
+            <mxPoint x="1640" y="2000" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1790" y="1660" />
+              <mxPoint x="1720" y="1800" />
+              <mxPoint x="1620" y="1900" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-25" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="jOLuExsDwOuBf2Oc7_jj-5" target="jOLuExsDwOuBf2Oc7_jj-3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1300" y="2020" as="sourcePoint" />
+            <mxPoint x="1825" y="2525" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1360" y="2130" />
+              <mxPoint x="1410" y="2190" />
+              <mxPoint x="1850" y="2190" />
+              <mxPoint x="2040" y="2100" />
+              <mxPoint x="2080" y="1920" />
+              <mxPoint x="2070" y="1560" />
+              <mxPoint x="1980" y="1460" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-26" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=0;exitX=0;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="jOLuExsDwOuBf2Oc7_jj-5" target="jOLuExsDwOuBf2Oc7_jj-1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="350" y="2210" as="sourcePoint" />
+            <mxPoint x="800" y="292" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1090" y="2130" />
+              <mxPoint x="1000" y="2190" />
+              <mxPoint x="740" y="2160" />
+              <mxPoint x="530" y="2020" />
+              <mxPoint x="370" y="1630" />
+              <mxPoint x="320" y="1340" />
+              <mxPoint x="280" y="1050" />
+              <mxPoint x="280" y="910" />
+              <mxPoint x="340" y="597" />
+              <mxPoint x="540" y="387" />
+              <mxPoint x="880" y="340" />
+              <mxPoint x="1080" y="350" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-27" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;AWADDR, AWVALID = 1,&lt;/font&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;ACSNOOP = WRITELINEUNIQUE&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;/&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;AWREADY = 1, RDATA = READ DATA FROM CACHE LINE , RRESP = OKAY,&amp;nbsp; RVALID=1, BRESP = 0&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="800" y="1680" width="410" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-28" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;ARADDR, ARVALID = 1,&lt;/font&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;ACSNOOP = READONCE&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;/&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;ARREADY = 1, RDATA, RRESP = OKAY,&amp;nbsp; RVALID=1&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1320" y="1680" width="410" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-29" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;AWADDR, AWVALID = 1,&lt;/font&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;ACSNOOP = WRITELINEUNIQUE&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;/&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;AWREADY = 1, RDATA = 0, RRESP = 0,&amp;nbsp; CRVALID=1, BRESP = OKAY, CDVALID = 0, WREADY = 1&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1640" y="2010" width="410" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-30" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;AWADDR, AWVALID = 1,&lt;/font&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;ACSNOOP = MAKEINVALID&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;/&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;ACREADY = 1, RDATA = 0, RRESP = INVALID, CDVALID = 0, CRVALID = 1, CRRESP = OKAY&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="350" y="570" width="410" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-31" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.273;exitY=0.075;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.727;entryY=0.041;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="jOLuExsDwOuBf2Oc7_jj-1" target="jOLuExsDwOuBf2Oc7_jj-1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1230" y="390" as="sourcePoint" />
+            <mxPoint x="1280" y="380" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1200" y="370" />
+              <mxPoint x="1230" y="330" />
+              <mxPoint x="1290" y="330" />
+              <mxPoint x="1320" y="380" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-32" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;ACADDR, ACVALID = 1,&lt;/font&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;ACSNOOP = MAKEINVALID&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;/&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;ACREADY = 1, RDATA = 0, RRESP = INVALID,&amp;nbsp;&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1060" y="230" width="410" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="jOLuExsDwOuBf2Oc7_jj-33" value="&lt;h1&gt;&lt;font style=&quot;font-size: 36px;&quot;&gt;STATE TRANSITION GRAPH FOR ACE CONTROLLER&lt;/font&gt;&lt;/h1&gt;" style="text;html=1;strokeColor=none;fillColor=none;spacing=5;spacingTop=-20;whiteSpace=wrap;overflow=hidden;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="790" y="70" width="940" height="50" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
