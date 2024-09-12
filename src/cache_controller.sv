@@ -7,8 +7,6 @@ module cache_controller #(
     // Datapath --> Cache Controller 
     input  logic                   cache_hit,
     input  logic                   cache_miss,
-    input  logic                   dirty_bit,
-    input  logic                   flush_done,
     input  logic [WIDTH_STATE-1:0] line_state,
 
     // Cache Controller --> Datapath
