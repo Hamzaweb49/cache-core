@@ -209,7 +209,7 @@ always_comb begin
         end
         CHECK_SNOOP: begin
             CR_VALID = 1;
-            
+
             if(snoop_miss || invalid) begin
                 miss_en    = 1;
                 if(!CR_READY) begin
@@ -255,7 +255,6 @@ always_comb begin
         end
         default: next_state = IDLE;
     endcase
-
 end
 
 endmodule
