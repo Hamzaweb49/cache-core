@@ -216,6 +216,7 @@ always_comb begin
                     next_state = CRESP;
                 end else begin
                     next_state = IDLE;
+                    AC_READY   = 1;
                 end
             end else begin
                 if(response) begin
@@ -223,6 +224,7 @@ always_comb begin
                         next_state = CRESP;
                     end else begin
                         next_state = IDLE;
+                        AC_READY   = 1;
                     end
                 end else if(response_data) begin
                     CD_VALID = 1;
@@ -230,6 +232,7 @@ always_comb begin
                         next_state = CRESP_DATA;
                     end else begin
                         next_state = IDLE;
+                        AC_READY   = 1;
                     end
                 end
             end
@@ -242,6 +245,7 @@ always_comb begin
                 next_state = CRESP_DATA;
             end else begin
                 next_state = IDLE;
+                AC_READY = 1;
             end
         end
         CRESP: begin
@@ -251,6 +255,7 @@ always_comb begin
                 next_state = CRESP;
             end else begin
                 next_state = IDLE;
+                AC_READY = 1;
             end
         end
         default: next_state = IDLE;
