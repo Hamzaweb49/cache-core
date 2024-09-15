@@ -28,4 +28,4 @@ module tb_top_level;
     logic [WIDTH_D-1:0]  W_DATA;
 
     logic                B_VALID, B_READY;
-    logic [1:0]          BRE
+    logic [1:0]          BRESP
