@@ -44,6 +44,7 @@ logic read_en, write_en;
 logic read_hit_en, write_hit_en;
 logic current_UC, current_UD, current_SC, current_SD, current_invalid;
 logic new_UC, new_UD, new_SC, new_SD, new_invalid;
+logic [4:0] state_select;
 
 // Decoding cache tasks
 assign read_en     = (cpu_request == 2'b00) ? 1 : 0;
@@ -59,16 +60,19 @@ assign current_invalid  = (line_state == 3'b100) ? 1 : 0;
 
 // Encoding next cache state logic
 always_comb begin
-    case (1'b1) // Use case to select the appropriate state
-        new_UC:      new_state = 3'b000;
-        new_UD:      new_state = 3'b001;
-        new_SC:      new_state = 3'b010;
-        new_SD:      new_state = 3'b011;
-        new_invalid: new_state = 3'b100;
-        default:     new_state = 3'b111; // Default state if no condition is met
+    new_state = 3'b111; // Default state
+    // Encode states into a single selection vector
+    state_select = {new_invalid, new_SD, new_SC, new_UD, new_UC};
+    // Use the combined vector to decide the new state
+    case (state_select)
+        5'b10000: new_state = 3'b000; // new_UC
+        5'b01000: new_state = 3'b001; // new_UD
+        5'b00100: new_state = 3'b010; // new_SC
+        5'b00010: new_state = 3'b011; // new_SD
+        5'b00001: new_state = 3'b100; // new_invalid
+        default:  new_state = 3'b111; // Fallback state
     endcase
 end
-
 
 always_ff @(posedge clk or negedge reset) begin
     if(!reset) begin
@@ -126,7 +130,7 @@ always_comb begin
                 cache_complete  = 1;
                 next_state      = IDLE;
             end
-            else if((current_invalid || cache_miss) && !(current_SD || current_UD)) begin
+            else if (current_invalid || (cache_miss && !(current_SD || current_UD))) begin
                 read_req    = 1;
                 next_state  = ALLOCATE_MEMORY;
             end 
@@ -134,7 +138,7 @@ always_comb begin
                 write_req   = 1;
                 next_state  = WRITEBACK;
             end 
-            else if(cache_hit && write_en && current_SC) begin
+            else if(cache_hit && write_hit_en && (current_SC || current_SD)) begin
                 new_UC      = 1;
                 invalid_req = 1;
                 next_state  = INVALIDATE;
@@ -163,22 +167,14 @@ always_comb begin
             if(!ace_ready) begin
                 next_state = WRITEBACK; 
             end 
-            else if(ace_ready && current_SD) begin
+            else if (ace_ready && (current_SD || current_UD)) begin
                 read_req    = 1;
                 new_SC      = 1;
-                next_state = ALLOCATE_MEMORY;
-            end 
-            else if(ace_ready && current_UD) begin
-                read_req    = 1;
-                new_SC      = 1;
-                next_state = ALLOCATE_MEMORY;
-            end 
+                next_state  = ALLOCATE_MEMORY;
+            end
         end
 
         INVALIDATE: begin
-            invalid_req         = 1;
-            new_UC              = 1;
-
             if(!ace_ready) begin
                 next_state = INVALIDATE; 
             end 
