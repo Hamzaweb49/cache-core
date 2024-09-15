@@ -91,6 +91,8 @@ module top_level #(
     logic make_unique, read_shared, write_clean;
     logic invalid, snoop_miss, response, response_data;
     logic B_okay, R_okay;
+    logic miss_en_signal;
+
 
     // Instantiate ACE Controller
     ace_controller ace_ctrl (
@@ -109,7 +111,7 @@ module top_level #(
         .make_unique_o(make_unique),
         .read_shared_o(read_shared),
         .write_clean_o(write_clean),
-        .miss_en(),
+        .miss_en(miss_en_signal),
         .AW_READY(AW_READY),
         .AW_VALID(AW_VALID),
         .W_READY(W_READY),
