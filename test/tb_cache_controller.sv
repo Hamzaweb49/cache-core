@@ -17,6 +17,7 @@ module tb_cache_controller;
     logic [2:0] new_state;
     logic       cache_complete;
     logic       cache_ready;
+    logic       state_sel;
 
     // Instantiate the cache controller module
     cache_controller uut (
@@ -34,6 +35,7 @@ module tb_cache_controller;
         .write_from_interconnect(write_from_interconnect),
         .new_state(new_state),
         .cache_complete(cache_complete),
+        .state_sel(state_sel),
         .cache_ready(cache_ready)
     );
 

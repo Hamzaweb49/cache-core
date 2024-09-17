@@ -24,6 +24,7 @@ module cache_controller #(
     output logic      write_from_cpu,
     output logic      write_from_interconnect,
     output logic [WIDTH_STATE-1:0] new_state,
+    output logic      state_sel,
 
     // cache controller -> cpu
     output logic      cache_complete,
@@ -108,6 +109,7 @@ always_comb begin
     new_SC              = 0;
     new_SD              = 0;
     new_invalid         = 0;
+    state_sel           = 0;
     case(state)
         IDLE: begin
             cache_ready         = 1;
@@ -124,10 +126,18 @@ always_comb begin
                 cache_complete  = 1;
                 next_state      = IDLE;
             end 
-            else if(cache_hit && write_hit_en && (current_UC || current_UD)) begin
+            else if(cache_hit && write_hit_en) begin
                 write_from_cpu  = 1;
                 cache_ready     = 1;
                 cache_complete  = 1;
+                if (current_UC) begin
+                    new_UC      = 1;
+                    state_sel   = 1;
+                end
+                if (current_UD) begin
+                    new_UD      = 1;
+                    state_sel   = 1;
+                end
                 next_state      = IDLE;
             end
             else if (current_invalid || (cache_miss && !(current_SD || current_UD))) begin
@@ -140,6 +150,7 @@ always_comb begin
             end 
             else if(cache_hit && write_hit_en && (current_SC || current_SD)) begin
                 new_UC      = 1;
+                state_sel   = 1;
                 invalid_req = 1;
                 next_state  = INVALIDATE;
             end 
@@ -170,6 +181,7 @@ always_comb begin
             else if (ace_ready && (current_SD || current_UD)) begin
                 read_req    = 1;
                 new_SC      = 1;
+                state_sel   = 1;
                 next_state  = ALLOCATE_MEMORY;
             end
         end
@@ -182,6 +194,7 @@ always_comb begin
                 cache_complete  = 1;
                 cache_ready     = 1;
                 new_UD          = 1;
+                state_sel       = 1;
                 write_from_cpu  = 1;
                 next_state = IDLE;
             end 
