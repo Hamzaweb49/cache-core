@@ -22,7 +22,8 @@ module ace_controller (
     output logic make_unique_o,
     output logic read_shared_o,
     output logic write_clean_o,
-    output logic miss_en,
+    output logic ac_enable,
+    output logic read_resp_en,
 
     // Input: Interconnect --> Ace Controller |----| Output: Ace Controller --> Interconnect
     // ** WRITE ADDRESS CHANNEL
@@ -103,7 +104,8 @@ always_comb begin
     make_unique_o = 0;
     read_shared_o = 0;
     write_clean_o = 0;
-    miss_en       = 0;
+    read_resp_en  = 0;
+    ac_enable     = 0;
     AW_VALID      = 0;
     AR_VALID      = 0;
     W_VALID       = 0;
@@ -139,6 +141,7 @@ always_comb begin
                 end
             end else if(AC_VALID) begin
                 next_state = CHECK_SNOOP;
+                ac_enable  = 1;
             end else begin
                 next_state = IDLE;
             end
@@ -196,14 +199,15 @@ always_comb begin
                 next_state = RDATA;
             end else begin
                 if(R_okay) begin
-                    next_state = IDLE;
-                    ace_ready  = 1;
+                    next_state   = IDLE;
+                    ace_ready    = 1;
+                    read_resp_en = 1;
                 end else if(!AR_READY) begin
-                    next_state = RADDR;
-                    AR_VALID   = 1;
+                    next_state   = RADDR;
+                    AR_VALID     = 1;
                 end else begin
-                    next_state = RDATA;
-                    AR_VALID   = 1;
+                    next_state   = RDATA;
+                    AR_VALID     = 1;
                 end
             end
         end
@@ -211,7 +215,6 @@ always_comb begin
             CR_VALID = 1;
 
             if(snoop_miss || invalid) begin
-                miss_en    = 1;
                 if(!CR_READY) begin
                     next_state = CRESP;
                 end else begin
