@@ -23,7 +23,8 @@ module tb_ace_controller;
     logic make_unique_o;
     logic read_shared_o;
     logic write_clean_o;
-    logic miss_en;
+    logic read_resp_en;
+    logic ac_enable;
 
     // Interconnect signals
     logic AW_READY;
@@ -60,7 +61,8 @@ module tb_ace_controller;
         .make_unique_o(make_unique_o),
         .read_shared_o(read_shared_o),
         .write_clean_o(write_clean_o),
-        .miss_en(miss_en),
+        .read_resp_en(read_resp_en),
+        .ac_enable(ac_enable),
         .AW_READY(AW_READY),
         .AW_VALID(AW_VALID),
         .W_READY(W_READY),
