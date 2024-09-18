@@ -130,13 +130,12 @@ always_comb begin
                 write_from_cpu  = 1;
                 cache_ready     = 1;
                 cache_complete  = 1;
+                state_sel   = 1;
                 if (current_UC) begin
                     new_UC      = 1;
-                    state_sel   = 1;
                 end
                 if (current_UD) begin
                     new_UD      = 1;
-                    state_sel   = 1;
                 end
                 next_state      = IDLE;
             end
@@ -152,25 +151,23 @@ always_comb begin
             end 
             else if(cache_miss && (current_SD || current_UD)) begin
                 write_req   = 1;
+                state_sel   = 1;
                 if (current_SD) begin
                     new_SC      = 1;
-                    state_sel   = 1;
                 end
                 if (current_UD) begin
                     new_UC    = 1;
-                    state_sel   = 1;
                 end
                 next_state  = WRITEBACK;
             end 
             else if(cache_hit && write_hit_en && (current_SC || current_SD)) begin
                 invalid_req = 1;
+                state_sel   = 1;
                 if (current_SC) begin
                     new_UC      = 1;
-                    state_sel   = 1;
                 end
                 if (current_SD) begin
                     new_UD    = 1;
-                    state_sel   = 1;
                 end
                 next_state  = INVALIDATE;
             end 
@@ -197,8 +194,13 @@ always_comb begin
             end 
             else if (ace_ready && (current_SD || current_UD)) begin
                 read_req    = 1;
-                new_SC      = 1;
                 state_sel   = 1;
+                if (current_SD) begin
+                    new_SC      = 1;
+                end
+                if (current_UD) begin
+                    new_UC    = 1;
+                end
                 next_state  = ALLOCATE_MEMORY;
             end
         end
