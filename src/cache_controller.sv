@@ -140,23 +140,38 @@ always_comb begin
                 end
                 next_state      = IDLE;
             end
-            else if ((current_invalid && read_hit_en) || (cache_miss && !(current_SD || current_UD))) begin
-                read_req    = 1;
-                next_state  = ALLOCATE_MEMORY;
-            end 
             else if (current_invalid && write_hit_en) begin
+                write_from_cpu  = 1;
                 cache_ready     = 1;
                 cache_complete  = 1;
                 next_state      = IDLE;
+            end
+            else if ((current_invalid && read_hit_en) || (cache_miss && !(current_SD || current_UD))) begin
+                read_req    = 1;
+                next_state  = ALLOCATE_MEMORY;    
             end 
             else if(cache_miss && (current_SD || current_UD)) begin
                 write_req   = 1;
+                if (current_SD) begin
+                    new_SC      = 1;
+                    state_sel   = 1;
+                end
+                if (current_UD) begin
+                    new_UC    = 1;
+                    state_sel   = 1;
+                end
                 next_state  = WRITEBACK;
             end 
             else if(cache_hit && write_hit_en && (current_SC || current_SD)) begin
-                new_UC      = 1;
-                state_sel   = 1;
                 invalid_req = 1;
+                if (current_SC) begin
+                    new_UC      = 1;
+                    state_sel   = 1;
+                end
+                if (current_SD) begin
+                    new_UD    = 1;
+                    state_sel   = 1;
+                end
                 next_state  = INVALIDATE;
             end 
             else begin
@@ -166,7 +181,6 @@ always_comb begin
         end
 
         ALLOCATE_MEMORY: begin
-            read_req            = 1;
             if (ace_ready) begin
                 write_from_interconnect = 1;
                 next_state          = PROCESS_REQUEST;
@@ -178,8 +192,6 @@ always_comb begin
         end
 
         WRITEBACK: begin
-            write_req           = 1;
-
             if(!ace_ready) begin
                 next_state = WRITEBACK; 
             end 
