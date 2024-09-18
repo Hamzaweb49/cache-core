@@ -108,7 +108,8 @@ logic invalid, snoop_miss, response, response_data, B_okay, R_okay;
 // Cache Datapath Instantiation
 cache_datapath #(
     .WIDTH_A(WIDTH_A),
-    .WIDTH_D(WIDTH_D)
+    .WIDTH_D(WIDTH_D),
+    .WIDTH_STATE(WIDTH_STATE)
 ) datapath (
     .clk                    (clk),
     .rst_n                  (rst_n),
