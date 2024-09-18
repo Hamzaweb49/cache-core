@@ -140,9 +140,14 @@ always_comb begin
                 end
                 next_state      = IDLE;
             end
-            else if (current_invalid || (cache_miss && !(current_SD || current_UD))) begin
+            else if ((current_invalid && read_hit_en) || (cache_miss && !(current_SD || current_UD))) begin
                 read_req    = 1;
                 next_state  = ALLOCATE_MEMORY;
+            end 
+            else if (current_invalid && write_hit_en) begin
+                cache_ready     = 1;
+                cache_complete  = 1;
+                next_state      = IDLE;
             end 
             else if(cache_miss && (current_SD || current_UD)) begin
                 write_req   = 1;
