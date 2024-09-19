@@ -126,7 +126,7 @@ always_comb begin
                 cache_complete  = 1;
                 next_state      = IDLE;
             end 
-            else if(cache_hit && write_hit_en) begin
+            else if(cache_hit && write_hit_en && (current_UC || current_UD)) begin
                 write_from_cpu  = 1;
                 cache_ready     = 1;
                 cache_complete  = 1;
@@ -139,11 +139,9 @@ always_comb begin
                 end
                 next_state      = IDLE;
             end
-            else if (current_invalid && write_hit_en) begin
-                write_from_cpu  = 1;
-                cache_ready     = 1;
-                cache_complete  = 1;
-                next_state      = IDLE;
+            else if (cache_hit && current_invalid && write_hit_en) begin
+                invalid_req     = 1;
+                next_state      = INVALIDATE;
             end
             else if ((current_invalid && read_hit_en) || (cache_miss && !(current_SD || current_UD))) begin
                 read_req    = 1;
