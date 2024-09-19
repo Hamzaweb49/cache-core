@@ -61,9 +61,9 @@ assign current_invalid  = (line_state == 3'b100) ? 1 : 0;
 
 // Encoding next cache state logic
 always_comb begin
-    new_state = 3'b111; // Default state
+    // new_state = 3'b111; // Default state
     // Encode states into a single selection vector
-    state_select = {new_invalid, new_SD, new_SC, new_UD, new_UC};
+    state_select = {new_UC, new_UD, new_SC, new_SD, new_invalid};
     // Use the combined vector to decide the new state
     case (state_select)
         5'b10000: new_state = 3'b000; // new_UC
