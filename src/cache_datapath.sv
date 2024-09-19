@@ -145,6 +145,9 @@ end
 // Invalid signal to ace controller indicating the requested line by snoop is in invalid state or not
 assign invalid = (cache[index_snoop].state == 3'b100) ? 1'b1 : 1'b0;
 
+// This value indicate that Cache is a write-back cache
+assign AW_CACHE = 4'b1010;
+assign AR_CACHE = 4'b1010;
 
 // Write response and read response message to Ace controller
 always_comb begin
@@ -186,9 +189,6 @@ always_comb begin
         next_state = next_state_r;
     end
 end
-
-// assign cache[index].state = next_state;
-
 
 always_comb begin
     if(write_clean) begin
@@ -273,26 +273,6 @@ always_comb begin
                 next_state_ac = cache[index_snoop].state;
                 CR_RESP = 5'b00000;
             end
-            // 4'b0010: begin
-            //     // READ CLEAN
-            //     response_data = 1;
-            //     response = 0;
-            //     if(miss_en) begin
-            //         CR_RESP = 5'b00000;
-            //         next_state_ac = cache[index_snoop].state;
-            //     end else begin
-            //         if(check_dirty) begin
-            //             next_state_ac = 3'b011; // Shared Dirty
-            //         end else begin
-            //             next_state_ac = 3'b010; // Shared Clean
-            //         end
-            //         if(is_shared) begin
-            //             CR_RESP = 5'b01001;
-            //         end else begin
-            //             CR_RESP = 5'b00001;
-            //         end
-            //     end
-            // end    
         endcase
     end
 end
@@ -323,7 +303,8 @@ always_ff @(posedge clk or negedge rst_n) begin
     // Writing Data From CPU To Cache
     else if (write_from_cpu) begin
         cache[index].valid_bit <= 1;
-        cache[index].data      <= cpu_wdata;  
+        cache[index].data      <= cpu_wdata;
+        cache[index].state     <= next_state;  
     end 
     // Writing Data From Main Mem To Cache
     else if (write_from_interconnect) begin                         
@@ -334,7 +315,7 @@ always_ff @(posedge clk or negedge rst_n) begin
     end 
     else begin
         cache[index_snoop].state <= next_state_ac;
-        cache[index].state <= next_state;
+        cache[index].state       <= next_state;
     end
 
 end
