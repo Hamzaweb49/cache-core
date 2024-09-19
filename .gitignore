@@ -1,0 +1,17 @@
+# Ignore ModelSim/QuestaSim work directory
+work/
+
+# Ignore ModelSim/QuestaSim simulation files
+*.wlf
+*.vstf
+*.vcd
+*.vstf
+*.log
+*.rpt
+*.ucdb
+*.syn
+transcript
+vsim_stacktrace.vstf
+vsim.wlf
+*.dat
+*.mem
