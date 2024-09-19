@@ -18,7 +18,7 @@ vsim: $(SRC_FILE) $(TB_FILE)
 	@echo "Compiling with ModelSim..."
 	vlog $(SRC_FILE) $(TB_FILE)
 	@echo "Running simulation with ModelSim..."
-	$(VSIM) $(VSIM_FLAGS) tb_restoring_division
+	$(VSIM) $(VSIM_FLAGS) tb_top_level
 
 # View waveform using GTKWave
 view: 
