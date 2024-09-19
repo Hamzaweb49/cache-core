@@ -47,6 +47,7 @@ module cache_datapath #(
     
     // ** WRITE RESPNOSE CHANNEL
     input  logic [1:0]             BRESP,
+    input  logic                   B_ID,
     
     // ** READ DATA CHANNEL
     input  logic                   R_ID,
@@ -60,7 +61,7 @@ module cache_datapath #(
 
     // ** SNOOP DATA CHANNEL
     output logic                   CD_LAST,
-    output logic [WIDTH_D-1:0]     CD_DATA
+    output logic [WIDTH_D-1:0]     CD_DATA,
 
     // ** READ ADDRESS CHANNEL
     output logic [WIDTH_A-1:0]     AR_ADDR,
@@ -88,11 +89,10 @@ module cache_datapath #(
     
     
     // ** WRITE DATA CHANNEL
-    output logic                   W_ID,
+    output logic                   W_STRB,
     output logic                   W_LAST,
-    output logic [WIDTH_D-1:0]     W_DATA,
+    output logic [WIDTH_D-1:0]     W_DATA
 );
-
 typedef struct packed {
     logic [31:0] data;
     logic [26:0] tag;
