@@ -130,13 +130,8 @@ always_comb begin
                 write_from_cpu  = 1;
                 cache_ready     = 1;
                 cache_complete  = 1;
-                state_sel   = 1;
-                if (current_UC) begin
-                    new_UC      = 1;
-                end
-                if (current_UD) begin
-                    new_UD      = 1;
-                end
+                state_sel       = 1;
+                new_UD          = 1;
                 next_state      = IDLE;
             end
             else if (cache_hit && current_invalid && write_hit_en) begin
