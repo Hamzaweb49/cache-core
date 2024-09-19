@@ -1,6 +1,7 @@
 module top_level #( 
     parameter WIDTH_A = 32,
-    parameter WIDTH_D = 32
+    parameter WIDTH_D = 32,
+    parameter WIDTH_STATE = 3
 ) (
     input logic                clk,
     input logic                rst_n,
@@ -99,6 +100,136 @@ module top_level #(
     output logic [WIDTH_D-1:0] CD_DATA
 );
 
-//  CODE ...
+logic write_from_cpu, write_from_interconnect, ac_enable, read_resp_en;
+logic [2:0] new_state, line_state;
+logic mux_en, cache_hit, cache_miss, make_unique, read_shared, write_clean;
+logic invalid, snoop_miss, response, response_data, B_okay, R_okay;
+
+// Cache Datapath Instantiation
+cache_datapath #(
+    .WIDTH_A(WIDTH_A),
+    .WIDTH_D(WIDTH_D),
+    .WIDTH_STATE(WIDTH_STATE)
+) datapath (
+    .clk                    (clk),
+    .rst_n                  (rst_n),
+    .cpu_addr               (cpu_addr),
+    .cpu_wdata              (cpu_wdata),
+    .cpu_rdata              (cpu_rdata),
+    .write_from_interconnect(write_from_interconnect),
+    .write_from_cpu         (write_from_cpu),
+    .new_state              (new_state),
+    .mux_en                 (mux_en),
+    .cache_hit              (cache_hit),
+    .cache_miss             (cache_miss),
+    .line_state             (line_state),
+    .make_unique            (make_unique),
+    .read_shared            (read_shared),
+    .write_clean            (write_clean),
+    .ac_enable              (ac_enable),
+    .read_resp_en           (read_resp_en),
+    .invalid                (invalid),
+    .snoop_miss             (snoop_miss),
+    .response               (response),
+    .response_data          (response_data),
+    .B_okay                 (B_okay),
+    .R_okay                 (R_okay),
+    .AC_SNOOP               (AC_SNOOP),
+    .AC_PROT                (AC_PROT),
+    .AC_ADDR                (AC_ADDR),
+    .BRESP                  (BRESP),
+    .B_ID                   (B_ID),
+    .R_ID                   (R_ID),
+    .R_LAST                 (R_LAST),
+    .RRESP                  (RRESP),
+    .RDATA                  (RDATA),
+    .CR_RESP                (CR_RESP),
+    .CD_LAST                (CD_LAST),
+    .CD_DATA                (CD_DATA),
+    .AR_ADDR                (AR_ADDR),
+    .AR_ID                  (AR_ID),
+    .AR_SIZE                (AR_SIZE),
+    .AR_BURST               (AR_BURST),
+    .AR_LEN                 (AR_LEN),
+    .AR_PROT                (AR_PROT),
+    .AR_CACHE               (AR_CACHE),
+    .AR_BAR                 (AR_BAR),
+    .AR_DOMAIN              (AR_DOMAIN),
+    .AR_SNOOP               (AR_SNOOP),
+    .AW_ADDR                (AW_ADDR),
+    .AW_ID                  (AW_ID),
+    .AW_SIZE                (AW_SIZE),
+    .AW_BURST               (AW_BURST),
+    .AW_LEN                 (AW_LEN),
+    .AW_PROT                (AW_PROT),
+    .AW_CACHE               (AW_CACHE),
+    .AW_BAR                 (AW_BAR),
+    .AW_DOMAIN              (AW_DOMAIN),
+    .AW_SNOOP               (AW_SNOOP),
+    .W_STRB                 (W_STRB),
+    .W_LAST                 (W_LAST),
+    .W_DATA                 (W_DATA)
+);
+
+// Cache Controller Instantiation (Assumed Ports)
+cache_controller #(
+    .WIDTH_STATE(WIDTH_STATE)
+) cache_ctrl (
+    .clk                    (clk),
+    .rst_n                  (rst_n),
+    .cpu_request            (cpu_request),
+    .cache_hit              (cache_hit),
+    .cache_miss             (cache_miss),
+    .line_state             (line_state),
+    .ace_ready              (ace_ready),
+    .read_req               (read_req),
+    .write_req              (write_req),
+    .invalid_req            (invalid_req),
+    .write_from_cpu         (write_from_cpu),
+    .write_from_interconnect(write_from_interconnect),
+    .new_state              (new_state),
+    .state_sel              (mux_en),
+    .cache_ready            (cache_ready),
+    .cache_complete         (cache_complete)
+);
+
+// ACE Controller Instantiation (Assumed Ports)
+ace_controller ace_ctrl (
+    .clk          (clk),
+    .rst_n        (rst_n),
+    .read_req     (read_req),
+    .write_req    (write_req),
+    .invalid_req  (invalid_req),
+    .ace_ready    (ace_ready),
+    .B_okay       (B_okay),
+    .R_okay       (R_okay),
+    .invalid      (invalid),
+    .snoop_miss   (snoop_miss),
+    .response     (response),
+    .response_data(response_data),
+    .make_unique_o(make_unique),
+    .read_shared_o(read_shared),
+    .write_clean_o(write_clean),
+    .ac_enable    (ac_enable),
+    .read_resp_en (read_resp_en),
+    .AW_VALID     (AW_VALID),
+    .AW_READY     (AW_READY),
+    .AR_VALID     (AR_VALID),
+    .AR_READY     (AR_READY),
+    .W_VALID      (W_VALID),
+    .W_READY      (W_READY),
+    .B_VALID      (B_VALID),
+    .B_READY      (B_READY),
+    .R_VALID      (R_VALID),
+    .R_READY      (R_READY),
+
+    .AC_VALID     (AC_VALID),
+    .AC_READY     (AC_READY),
+
+    .CR_READY     (CR_READY),
+    .CR_VALID     (CR_VALID),
+    .CD_READY     (CD_READY),
+    .CD_VALID     (CD_VALID)
+);
 
 endmodule
