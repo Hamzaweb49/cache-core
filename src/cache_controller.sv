@@ -183,7 +183,8 @@ always_comb begin
 
         WRITEBACK: begin
             if(!ace_ready) begin
-                next_state = WRITEBACK; 
+                next_state = WRITEBACK;
+                write_req  = 1; 
             end 
             else if (ace_ready) begin
                 read_req    = 1;
