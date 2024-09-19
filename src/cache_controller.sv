@@ -176,6 +176,7 @@ always_comb begin
                 next_state          = PROCESS_REQUEST;
             end
             else if(!ace_ready) begin
+                read_req   = 1;
                 next_state = ALLOCATE_MEMORY;
             end
         end
@@ -184,14 +185,8 @@ always_comb begin
             if(!ace_ready) begin
                 next_state = WRITEBACK; 
             end 
-            else if (ace_ready && (current_SD || current_UD)) begin
-                state_sel   = 1;
-                if (current_SD) begin
-                    new_SC      = 1;
-                end
-                if (current_UD) begin
-                    new_UC    = 1;
-                end
+            else if (ace_ready) begin
+                read_req    = 1;
                 next_state  = ALLOCATE_MEMORY;
             end
         end
