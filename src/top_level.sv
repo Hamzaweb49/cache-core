@@ -176,7 +176,7 @@ cache_controller #(
     .WIDTH_STATE(WIDTH_STATE)
 ) cache_ctrl (
     .clk                    (clk),
-    .rst_n                  (rst_n),
+    .reset                  (rst_n),
     .cpu_request            (cpu_request),
     .cache_hit              (cache_hit),
     .cache_miss             (cache_miss),
