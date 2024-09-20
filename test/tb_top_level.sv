@@ -319,9 +319,9 @@ module tb_top_level;
                 while(!cache_complete) @(posedge clk);
                 @(posedge clk);
                 if(cpu_rdata == write_data) begin
-                    $display("CPU write SUCCESS:  rdata: %h, wdata: %h", cpu_rdata, cpu_wdata);
+                    $display("CPU write SUCCESS:  rdata: %h, wdata: %h", cpu_rdata, write_data);
                 end else begin
-                    $display("CPU write Fail: rdata: %h, wdata: %h", cpu_rdata, cpu_wdata);
+                    $display("CPU write Fail: rdata: %h, wdata: %h", cpu_rdata, write_data);
                 end
             end
             else if (cpu_request == 2'b00) begin // Read request
@@ -332,26 +332,6 @@ module tb_top_level;
             end
         end
     endtask
-
-    // Monitor task for Interconnect side
-    task monitor_interconnect_side;
-        forever begin
-            @(posedge clk);
-            if (AW_VALID && AW_READY) begin // Write request on ACE
-                $display("Interconnect Write: Addr = %h", AW_ADDR);
-            end
-            if (AR_VALID && AR_READY) begin // Read request on ACE
-                $display("Interconnect Read: Addr = %h", AR_ADDR);
-            end
-            if (B_VALID && B_READY) begin // Write response on ACE
-                $display("Interconnect Write Response: BRESP = %b", BRESP);
-            end
-            if (R_VALID && R_READY) begin // Read response on ACE
-                $display("Interconnect Read Response: RDATA = %h, RRESP = %b", RDATA, RRESP);
-            end
-        end
-    endtask
-
 
     initial begin
         fork
@@ -371,21 +351,19 @@ module tb_top_level;
         initialize();
         reset();
         
-        // Example sequence
+       // Example sequence
+        // Read from the Cache
         drive_cpu_read(32'h00000018);
-        // drive_cpu_write(32'h00000010, 32'hDEADBEEF);
-        repeat($urandom % 10) @(posedge clk);
+        repeat(10) @(posedge clk);
+        // Write to the same Cache address
+        drive_cpu_write(32'h00000000, 32'hDEADBEEF);
 
+        // Write to another Cache address
         drive_cpu_write(32'h00000010, 32'hFEEDBEEF);
-        // Same index but different tag --> WRITE MISS
+        // Write to same index but different tag --> WRITE MISS
         drive_cpu_write(32'h01000010, 32'hDEADDEED);
 
-        // drive_cpu_write(32'h00000010, 32'hDEADBEEF);
-
-        // drive_cpu_write(32'h00000010, 32'hBEEFFEED);
-        // repeat($urandom % 10) @(posedge clk);
-        drive_cpu_read(32'h00000018);
-        // drive_cpu_read(32'h00000010);
+        drive_cpu_read(32'h01000010);
 
         repeat($urandom % 10) @(posedge clk);
         
