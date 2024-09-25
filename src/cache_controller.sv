@@ -71,7 +71,7 @@ always_comb begin
         5'b00100: new_state = 3'b010; // new_SC
         5'b00010: new_state = 3'b011; // new_SD
         5'b00001: new_state = 3'b100; // new_invalid
-        default:  new_state = 3'b100; // Fallback state
+        default:  new_state = 3'b000; // Fallback state
     endcase
 end
 
@@ -113,7 +113,7 @@ always_comb begin
     case(state)
         IDLE: begin
             cache_ready         = 1;
-            if((read_en || write_en)) begin
+            if((read_hit_en || write_hit_en)) begin
                 next_state = PROCESS_REQUEST;
             end else begin
                 next_state = IDLE;
