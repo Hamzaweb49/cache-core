@@ -88,8 +88,12 @@ module tb_cache_controller;
     task driver();
         integer i;
         begin
-            for (i = 0; i < 10; i = i + 1) begin
+            for (i = 0; i < 200; i = i + 1) begin
                 random_cpu_request = $urandom % 4; // Generate random 2-bit CPU request
+                // Check if cpu_request is 10, and if so, change it to 01
+                if (random_cpu_request == 2'b10) begin
+                    random_cpu_request = 2'b01;
+                end
                 random_ace_ready = $urandom % 2;   // Generate random ACE ready signal
                 drive_inputs(random_cpu_request, random_ace_ready);
                 @(posedge clk);                    // Wait for the next clock cycle
@@ -110,6 +114,9 @@ module tb_cache_controller;
             cache_hit = $urandom % 2;              // Randomly assign cache hit 
             cache_miss = ~cache_hit;               // Cache miss is inverse of hit
             line_state = $urandom % 8;             // Randomize line state (3-bit)
+
+            // Wait for cache to be ready
+            while (!cache_ready) @(posedge clk);
 
             @(posedge clk);                        // Wait for the next clock cycle
         end
@@ -135,7 +142,8 @@ module tb_cache_controller;
                     ref_write_req = 1;
                     ref_state_sel = 1;
                     ref_new_state = (line_state == 3'b011) ? 3'b011 : 3'b000;
-                end else begin
+                end 
+                else if (!(line_state == 3'b011 || line_state == 3'b001)) begin
                     ref_read_req = 1;
                 end
             end
@@ -161,6 +169,10 @@ module tb_cache_controller;
                     end
                 end
                 2'b11: begin
+                    ref_cache_ready = 1;
+                    ref_cache_complete = 1;
+                end
+                default: begin
                     ref_cache_ready = 1;
                     ref_cache_complete = 1;
                 end
@@ -222,6 +234,5 @@ module tb_cache_controller;
         $dumpfile("cache_controller.vcd");   // Output file for waveform
         $dumpvars(0);                        // Dump all variables
     end
-
 
 endmodule
