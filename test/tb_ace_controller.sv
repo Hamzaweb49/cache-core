@@ -63,6 +63,8 @@ module tb_ace_controller;
 
     integer pass_count = 0;
     integer fail_count = 0;
+    integer pass_count_int = 0;
+    integer fail_count_int = 0;
 
     // Instantiate the ace_controller
     ace_controller uut (
@@ -291,7 +293,7 @@ module tb_ace_controller;
         end
     endtask
 
-    task initialize_expected;
+    task initialize_expected_controller_datapath;
         forever begin
             #1;
             @(posedge clk);
@@ -317,6 +319,99 @@ module tb_ace_controller;
             end
         end
     endtask
+
+    task monitor_interconnect_side;
+        forever begin
+            @(posedge clk);
+            while(!rst_n || !(AW_VALID || W_VALID || B_READY || AR_VALID || R_READY || AC_READY || CD_VALID || CR_VALID)) @(posedge clk);
+            
+            // Compare only when expected value is not 'x'
+            if ((expected_AR_VALID !== 1'bx && AR_VALID != expected_AR_VALID) ||
+            (expected_AW_VALID !== 1'bx && AW_VALID != expected_AW_VALID) ||
+            (expected_W_VALID  !== 1'bx && W_VALID  != expected_W_VALID)  ||
+            (expected_B_READY  !== 1'bx && B_READY  != expected_B_READY)  ||
+            (expected_R_READY  !== 1'bx && R_READY  != expected_R_READY)  ||
+            (expected_AC_READY !== 1'bx && AC_READY != expected_AC_READY) ||
+            (expected_CR_VALID !== 1'bx && CR_VALID != expected_CR_VALID) ||
+            (expected_CD_VALID !== 1'bx && CD_VALID != expected_CD_VALID)) begin
+            $display("FAIL: Interconnect side outputs mismatch at time %0t", $time);
+            // Display expected values
+            $display("Expected: AR_VALID=%0b, AW_VALID=%0b, W_VALID=%0b, B_READY=%0b, R_READY=%0b, AC_READY=%0b, CR_VALID=%0b, CD_VALID=%0b", 
+                expected_AR_VALID, expected_AW_VALID, expected_W_VALID, expected_B_READY, expected_R_READY, expected_AC_READY, expected_CR_VALID, expected_CD_VALID);
+            // Display actual values
+            $display("Actual  : AR_VALID=%0b, AW_VALID=%0b, W_VALID=%0b, B_READY=%0b, R_READY=%0b, AC_READY=%0b, CR_VALID=%0b, CD_VALID=%0b", 
+                AR_VALID, AW_VALID, W_VALID, B_READY, R_READY, AC_READY, CR_VALID, CD_VALID);
+            fail_count_int++;
+        end else begin
+            $display("PASS: Interconnect side outputs are correct at time %0t", $time);
+            pass_count_int++;
+        end
+
+        end
+    endtask
+
+    task initialize_expected_interconnect;
+        static logic was_write_req, was_read_req, was_invalid_req, was_AC_VALID, was_snoop_miss;
+
+        forever begin
+            @(posedge clk);
+            // Update flags to track the state of conditions for the next cycle
+            was_write_req   = write_req;
+            was_read_req    = read_req;
+            was_invalid_req = invalid_req;
+            was_AC_VALID    = AC_VALID;
+            was_snoop_miss  = snoop_miss;
+               
+            // Reset expected values for the new cycle
+            expected_AW_VALID = #1 1'bx;
+            expected_AR_VALID = #1 1'bx;
+            expected_W_VALID  = #1 1'bx;
+            expected_B_READY  = #1 1'bx;
+            expected_R_READY  = #1 1'bx;
+            expected_AC_READY = #1 1'bx;
+            expected_CR_VALID = #1 1'bx;
+            expected_CD_VALID = #1 1'bx;
+        
+            // Conditions for write requests
+            if (write_req) begin
+                expected_AW_VALID = #1 1;                    
+            end else if (was_write_req && AW_READY) begin
+                expected_AW_VALID = #1 1;
+            end else if (was_write_req && W_READY) begin
+                expected_W_VALID = #1 1;
+            end else if (was_write_req && B_VALID) begin
+                expected_B_READY = #1 1;
+            end
+        
+            // Conditions for read requests
+            if (read_req || invalid_req) begin
+                expected_AR_VALID = #1 1;
+            end else if (was_read_req && AR_READY) begin
+                expected_AR_VALID = #1 1;
+                expected_R_READY = #1 1;
+            end else if (was_read_req && R_VALID) begin
+                expected_R_READY = #1 1;
+            end
+        
+            // Conditions for AC_VALID
+            if (AC_VALID) begin
+                expected_AC_READY = #1 1;
+            end else if (was_AC_VALID && (snoop_miss || invalid_req)) begin
+                if (response) begin
+                    expected_CR_VALID = #1 1;
+                end else if (response_data) begin
+                    expected_CR_VALID = #1 1;
+                    expected_CD_VALID = #1 1;
+                end
+            end else if (was_AC_VALID && CR_READY && CD_READY) begin
+                expected_CD_VALID = #1 1;
+                expected_CR_VALID = #1 1;
+            end else if (was_AC_VALID && CR_READY) begin
+                expected_CR_VALID = #1 1;
+            end
+
+        end
+    endtask
     
     task call_request;
         begin
@@ -339,7 +434,9 @@ module tb_ace_controller;
     initial begin
         fork
             monitor_datapath_controller();
-            initialize_expected();
+            initialize_expected_controller_datapath();
+            monitor_interconnect_side();
+            initialize_expected_interconnect();
         join_none
     end
 
@@ -354,6 +451,8 @@ module tb_ace_controller;
         $display("Total Passes: %0d", pass_count);
         $display("Total Fails: %0d", fail_count);
         
+        $display("Total Passes interconnect side: %0d", pass_count_int);
+        $display("Total Fails interconnect side: %0d", fail_count_int);
         // Finish simulation
         @(posedge clk);
         $finish;
