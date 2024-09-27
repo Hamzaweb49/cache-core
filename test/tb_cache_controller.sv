@@ -89,9 +89,14 @@ module tb_cache_controller;
         integer i;
         begin
             for (i = 0; i < 200; i = i + 1) begin
+                @(posedge clk);                    // Wait for the next clock cycle
                 random_cpu_request = $urandom % 4; // Generate random 2-bit CPU request
-                // Check if cpu_request is 10, and if so, change it to 01
+                // Check if cpu_request is 10, and if so, change it to 00
                 if (random_cpu_request == 2'b10) begin
+                    random_cpu_request = 2'b00;
+                end
+                // Check if cpu_request is 11, and if so, change it to 01
+                else if (random_cpu_request == 2'b11) begin
                     random_cpu_request = 2'b01;
                 end
                 random_ace_ready = $urandom % 2;   // Generate random ACE ready signal
@@ -124,7 +129,8 @@ module tb_cache_controller;
 
     // Reference model to generate expected outputs based on inputs
     task reference_model();
-        begin
+        forever begin
+            @(posedge clk); // Wait for clock edge
             // Initialize reference model outputs
             ref_cache_ready = 0;
             ref_cache_complete = 0;
@@ -168,15 +174,13 @@ module tb_cache_controller;
                         ref_invalid_req = 1;
                     end
                 end
-                2'b11: begin
-                    ref_cache_ready = 1;
-                    ref_cache_complete = 1;
-                end
                 default: begin
-                    ref_cache_ready = 1;
-                    ref_cache_complete = 1;
+                    ref_cache_ready = cache_ready;
+                    ref_cache_complete = cache_complete;
                 end
             endcase
+
+            @(posedge clk); // Wait for the next clock edge
         end
     endtask
 
@@ -184,9 +188,6 @@ module tb_cache_controller;
     task monitor();
         forever begin
             @(posedge clk); // Wait for clock edge
-
-            // Call the reference model to generate expected outputs
-            reference_model();
 
             @(posedge clk); // Wait for the next clock edge
             while(!(cache_ready && cache_complete && read_req && write_req && invalid_req && write_from_cpu && write_from_interconnect && new_state && state_sel)) @(posedge clk)
@@ -220,6 +221,7 @@ module tb_cache_controller;
 
         // Start the monitor task in parallel
         fork
+            reference_model();
             monitor(); // Continuous monitoring
         join_none
 
