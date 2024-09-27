@@ -173,7 +173,7 @@ always_comb begin
                 if(B_okay) begin
                     next_state = IDLE;
                     ace_ready  = 1;
-                end else if (!AR_READY) begin
+                end else if (!AW_READY) begin
                     next_state = WADDR;
                     AW_VALID   = 1;
                 end else begin

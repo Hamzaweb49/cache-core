@@ -1,4 +1,3 @@
-
 module tb_ace_controller;
     // Clock and Reset
     logic clk;
@@ -64,8 +63,6 @@ module tb_ace_controller;
 
     integer pass_count = 0;
     integer fail_count = 0;
-    integer pass_count_int = 0;
-    integer fail_count_int = 0;
 
     // Instantiate the ace_controller
     ace_controller uut (
@@ -84,7 +81,6 @@ module tb_ace_controller;
         .make_unique_o(make_unique_o),
         .read_shared_o(read_shared_o),
         .write_clean_o(write_clean_o),
-        // .miss_en(miss_en),
         .ac_enable(ac_enable),
         .read_resp_en(read_resp_en),
         .AW_READY(AW_READY),
@@ -115,7 +111,7 @@ module tb_ace_controller;
     task reset;
         begin
             rst_n = 0;
-            repeat(10) @(posedge clk); // Hold reset for 2 clock cycles
+            #200;
             rst_n = 1;
             @(posedge clk);
         end
@@ -146,26 +142,35 @@ module tb_ace_controller;
 
     // Task to drive write request
     task drive_write_request;
+        int local_count;
         begin
             write_req = 1;
-            AW_READY = 1;
-            @(posedge clk);
-            write_req = 0;
-            // @(posedge clk);
-            while(!AW_VALID) @(posedge clk);
-            AW_READY = 0;
+            local_count = 0;
+            while(!B_okay) begin
+                local_count++;
+                AW_READY = 1;
+                @(posedge clk);
+                write_req = 0;
+                while(!AW_VALID) @(posedge clk);
+                AW_READY = 0;
 
-            W_READY = 1;
-            @(posedge clk);
-            while(!W_VALID) @(posedge clk);
-            W_READY = 0;
+                W_READY = 1;
+                @(posedge clk);
+                while(!W_VALID) @(posedge clk);
+                W_READY = 0;
 
-            B_VALID = 1'b1;
-            B_okay = 1'b1;
-            @(posedge clk);
-            while(!B_READY) @(posedge clk);
-            B_VALID = 0;
-            B_okay = 1'b0;
+                B_VALID = 1;
+                if((local_count == 10) && (!B_okay)) begin
+                    B_okay = 1;
+                end else begin
+                    B_okay = $urandom % 2;
+                end
+
+                @(posedge clk);
+                while(!B_READY) @(posedge clk);
+                B_VALID = 0;
+            end
+            B_okay = 0;
 
             while(!ace_ready) @(posedge clk);
 
@@ -174,10 +179,13 @@ module tb_ace_controller;
 
     // Task to drive read request
     task drive_read_request;
+        int local_count;
         begin
             read_req = 1;
+            local_count = 0;
             // SUppose a condition when Response in not OKAY
-            repeat(5) begin
+            while(!R_okay) begin
+                local_count++;
                 AR_READY = 1;
                 @(posedge clk);
                 read_req = 0;
@@ -185,25 +193,17 @@ module tb_ace_controller;
                 AR_READY = 0;
 
                 R_VALID = 1;
-                R_okay = 0;
+                if((local_count == 10) && (!R_okay)) begin
+                    R_okay = 1;
+                end else begin
+                    R_okay = $urandom % 2;
+                end
                 @(posedge clk);
                 while(!R_READY) @(posedge clk);
                 R_VALID = 0;
-                R_okay = 0;
             end
-            AR_READY = 1;
-            @(posedge clk);
-            while(!AR_VALID) @(posedge clk);
-            AR_READY = 0;
-
-            R_VALID = 1;
-            R_okay = 1;
-            @(posedge clk);
-            while(!R_READY) @(posedge clk);
-            R_VALID = 0;
             R_okay = 0;
             
-
             while(!ace_ready) @(posedge clk);
         end
     endtask
@@ -258,7 +258,7 @@ module tb_ace_controller;
             @(posedge clk);
             response = 0;
             while(!CR_VALID) @(posedge clk);
-            repeat(5) @(posedge clk);
+            repeat($urandom % 10) @(posedge clk);
             CR_READY = 1;
             @(posedge clk);
             CR_READY = 0;
@@ -290,25 +290,6 @@ module tb_ace_controller;
             end
         end
     endtask
-    
-
-    task call_request;
-        begin
-            logic [2:0] local_var;
-            repeat(10) begin
-                local_var = $urandom;
-                case(local_var) 
-                    3'b000: drive_read_request();
-                    3'b001: drive_invalid_request();
-                    3'b010: drive_write_request();
-                    3'b011: drive_snoop_miss();
-                    3'b100: drive_response();
-                    3'b101: drive_invalid_request();
-                    default: drive_write_request();
-                endcase
-            end
-        end
-    endtask
 
     task initialize_expected;
         forever begin
@@ -336,13 +317,29 @@ module tb_ace_controller;
             end
         end
     endtask
+    
+    task call_request;
+        begin
+            logic [2:0] local_var;
+            repeat(100000) begin
+                local_var = $urandom;
+                case(local_var) 
+                    3'b000: drive_read_request();
+                    3'b001: drive_invalid_request();
+                    3'b010: drive_write_request();
+                    3'b011: drive_snoop_miss();
+                    3'b100: drive_response();
+                    3'b101: drive_invalid_request();
+                    default: drive_write_request();
+                endcase
+            end
+        end
+    endtask
 
     initial begin
         fork
             monitor_datapath_controller();
-            // monitor_interconnect_side();
             initialize_expected();
-            // initialize_expected_interconnect();
         join_none
     end
 
@@ -352,11 +349,10 @@ module tb_ace_controller;
         reset();
 
         call_request();
+
         // Final results
         $display("Total Passes: %0d", pass_count);
         $display("Total Fails: %0d", fail_count);
-        // $display("Total Passes: %0d", pass_count_int);
-        // $display("Total Fails: %0d", fail_count_int);
         
         // Finish simulation
         @(posedge clk);
