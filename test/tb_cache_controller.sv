@@ -113,6 +113,10 @@ module tb_cache_controller;
     );
         begin
             cpu_request = request;                 // Drive CPU request input
+            
+            // Wait for cache to be ready
+            while (!cache_ready) @(posedge clk);
+
             ace_ready = ace_ready_in;              // Drive ACE ready input
 
             // Randomize cache hit/miss and line state for testing
@@ -120,8 +124,6 @@ module tb_cache_controller;
             cache_miss = ~cache_hit;               // Cache miss is inverse of hit
             line_state = $urandom % 8;             // Randomize line state (3-bit)
 
-            // Wait for cache to be ready
-            while (!cache_ready) @(posedge clk);
 
             @(posedge clk);                        // Wait for the next clock cycle
         end
