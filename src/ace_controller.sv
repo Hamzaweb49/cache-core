@@ -90,11 +90,28 @@ typedef enum logic [3:0]{
 
 state_t current_state, next_state;
 
+// Internal signals
+logic read_op, invalid_op;
+
+// Make the signal corresponding to the request as high
 always_ff @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
-        current_state <= IDLE;
+        read_op    <= 0;
+        invalid_op <= 0;
+    end else if(read_req) begin
+        read_op    <= 1;
+        invalid_op <= 0;
+    end else if(invalid_req) begin
+        read_op    <= 0;
+        invalid_op <= 1;
+    end 
+end 
+
+always_ff @(posedge clk or negedge rst_n) begin
+    if(!rst_n) begin
+        current_state <= #1 IDLE;
     end else begin
-        current_state <= next_state;
+        current_state <= #1 next_state;
     end
 end
 
@@ -127,17 +144,22 @@ always_comb begin
                 end else begin
                     next_state = WDATA;
                 end
-            end else if(read_req || invalid_req) begin
-                AR_VALID = 1;
+            end else if(read_req) begin
+                AR_VALID      = 1;
+                read_shared_o = 1;
                 if(!AR_READY) begin
                     next_state = RADDR;
                 end else begin
                     next_state = RDATA;
                 end
-                if(read_req) begin
-                    read_shared_o = 1;
+            end else if(invalid_req) begin
+                AR_VALID      = 1;
+                make_unique_o = 1;
+                if(!AR_READY) begin
+                    next_state = RADDR;
                 end else begin
-                    make_unique_o = 1;
+                    next_state = IDLE;
+                    ace_ready  = 1;
                 end
             end else if(AC_VALID) begin
                 next_state = CHECK_SNOOP;
@@ -173,7 +195,7 @@ always_comb begin
                 if(B_okay) begin
                     next_state = IDLE;
                     ace_ready  = 1;
-                end else if (!AR_READY) begin
+                end else if (!AW_READY) begin
                     next_state = WADDR;
                     AW_VALID   = 1;
                 end else begin
@@ -187,9 +209,12 @@ always_comb begin
 
             if(!AR_READY) begin
                 next_state = RADDR;
-            end else begin 
+            end else if(read_op) begin 
                 next_state = RDATA;
                 R_READY    = 1;
+            end else if(invalid_op) begin
+                next_state = IDLE;
+                ace_ready  = 1;
             end
         end
         RDATA: begin

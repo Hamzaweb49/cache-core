@@ -44,6 +44,28 @@ module tb_ace_controller;
     logic CD_READY;
     logic CD_VALID;
 
+    // Expected outputs for monitoring
+    logic expected_ace_ready;
+    logic expected_make_unique;
+    logic expected_write_clean;
+    logic expected_read_shared;
+    logic expected_ac_enable;
+    logic expected_read_resp_en;
+
+    logic expected_AC_READY;
+    logic expected_AR_VALID;
+    logic expected_AW_VALID;
+    logic expected_B_READY;
+    logic expected_W_VALID;
+    logic expected_CD_VALID;
+    logic expected_CR_VALID;
+    logic expected_R_READY;
+
+    integer pass_count = 0;
+    integer fail_count = 0;
+    integer pass_count_int = 0;
+    integer fail_count_int = 0;
+
     // Instantiate the ace_controller
     ace_controller uut (
         .clk(clk),
@@ -61,8 +83,8 @@ module tb_ace_controller;
         .make_unique_o(make_unique_o),
         .read_shared_o(read_shared_o),
         .write_clean_o(write_clean_o),
-        .read_resp_en(read_resp_en),
         .ac_enable(ac_enable),
+        .read_resp_en(read_resp_en),
         .AW_READY(AW_READY),
         .AW_VALID(AW_VALID),
         .W_READY(W_READY),
@@ -91,7 +113,7 @@ module tb_ace_controller;
     task reset;
         begin
             rst_n = 0;
-            repeat(10) @(posedge clk); // Hold reset for 2 clock cycles
+            #200;
             rst_n = 1;
             @(posedge clk);
         end
@@ -122,25 +144,35 @@ module tb_ace_controller;
 
     // Task to drive write request
     task drive_write_request;
+        int local_count;
         begin
             write_req = 1;
-            AW_READY = 1;
-            @(posedge clk);
-            write_req = 0;
-            // @(posedge clk);
-            while(!AW_VALID) @(posedge clk);
-            AW_READY = 0;
+            local_count = 0;
+            while(!B_okay) begin
+                local_count++;
+                AW_READY = 1;
+                @(posedge clk);
+                write_req = 0;
+                while(!AW_VALID) @(posedge clk);
+                AW_READY = 0;
 
-            W_READY = 1;
-            @(posedge clk);
-            while(!W_VALID) @(posedge clk);
-            W_READY = 0;
+                W_READY = 1;
+                @(posedge clk);
+                while(!W_VALID) @(posedge clk);
+                W_READY = 0;
 
-            B_VALID = 1;
-            B_okay = 1;
-            @(posedge clk);
-            while(!B_READY) @(posedge clk);
-            B_VALID = 0;
+                B_VALID = 1;
+                if((local_count == 10) && (!B_okay)) begin
+                    B_okay = 1;
+                end else begin
+                    B_okay = $urandom % 2;
+                end
+
+                @(posedge clk);
+                while(!B_READY) @(posedge clk);
+                B_VALID = 0;
+            end
+            B_okay = 0;
 
             while(!ace_ready) @(posedge clk);
 
@@ -149,12 +181,13 @@ module tb_ace_controller;
 
     // Task to drive read request
     task drive_read_request;
+        int local_count;
         begin
             read_req = 1;
-            // @(posedge clk);
-
+            local_count = 0;
             // SUppose a condition when Response in not OKAY
-            repeat(5) begin
+            while(!R_okay) begin
+                local_count++;
                 AR_READY = 1;
                 @(posedge clk);
                 read_req = 0;
@@ -162,23 +195,17 @@ module tb_ace_controller;
                 AR_READY = 0;
 
                 R_VALID = 1;
-                R_okay = 0;
+                if((local_count == 10) && (!R_okay)) begin
+                    R_okay = 1;
+                end else begin
+                    R_okay = $urandom % 2;
+                end
                 @(posedge clk);
                 while(!R_READY) @(posedge clk);
                 R_VALID = 0;
             end
-            AR_READY = 1;
-            @(posedge clk);
-            while(!AR_VALID) @(posedge clk);
-            AR_READY = 0;
-
-            R_VALID = 1;
-            R_okay = 1;
-            @(posedge clk);
-            while(!R_READY) @(posedge clk);
-            R_VALID = 0;
+            R_okay = 0;
             
-
             while(!ace_ready) @(posedge clk);
         end
     endtask
@@ -187,18 +214,21 @@ module tb_ace_controller;
     task drive_invalid_request;
         begin
             invalid_req = 1;
-            AR_READY = 1;
-            @(posedge clk);
-            invalid_req = 0;
-            while(!AR_VALID) @(posedge clk);
-            AR_READY = 0;
-
-            R_VALID = 1;
-            R_okay = 1;
-            @(posedge clk);
-            while(!R_READY) @(posedge clk);
-            R_VALID = 0;
-            
+            AR_READY = $urandom % 2;
+            if(!AR_READY) begin
+                @(posedge clk);
+                invalid_req = 0;
+                repeat(5) @(posedge clk);
+                AR_READY = 1;
+                @(posedge clk);
+                while(!AR_VALID) @(posedge clk);
+                AR_READY = 0;
+            end else begin
+                @(posedge clk);
+                invalid_req = 0;
+                while(!AR_VALID) @(posedge clk);
+                AR_READY = 0;
+            end
             while(!ace_ready) @(posedge clk);
         end
     endtask
@@ -232,7 +262,7 @@ module tb_ace_controller;
             @(posedge clk);
             response = 0;
             while(!CR_VALID) @(posedge clk);
-            repeat(5) @(posedge clk);
+            repeat($urandom % 10) @(posedge clk);
             CR_READY = 1;
             @(posedge clk);
             CR_READY = 0;
@@ -240,66 +270,199 @@ module tb_ace_controller;
         end
     endtask
 
-    // Monitor task
-    task monitor_controller_side;
+    task monitor_datapath_controller;
         forever begin
-            while(!(read_req || write_req || invalid_req)) @(posedge clk);
-            $display("ACE CONTROLLER ACTIVATED");
+            @(posedge clk); // Wait for a clock cycle
+            while(!(make_unique_o || read_shared_o || write_clean_o || read_resp_en || ac_enable || ace_ready)) @(posedge clk);
+
+            // Compare actual outputs with expected values
+            if ((make_unique_o !== expected_make_unique) ||
+                (write_clean_o !== expected_write_clean) ||
+                (read_shared_o !== expected_read_shared) ||
+                (read_resp_en !== expected_read_resp_en) ||
+                (ace_ready !== expected_ace_ready) ||
+                (ac_enable !== expected_ac_enable)) begin
+                $display("FAIL: Datapath side outputs mismatch at time %0t", $time);
+                $display("Expected: make_unique_o=%0b, write_clean_o=%0b, read_shared_o=%0b, read_resp_en=%0b, ac_enable=%0b, ace_ready=%0b", 
+                         expected_make_unique, expected_write_clean, expected_read_shared, expected_read_resp_en, expected_ac_enable, expected_ace_ready);
+                $display("Actual  : make_unique_o=%0b, write_clean_o=%0b, read_shared_o=%0b, read_resp_en=%0b, ac_enable=%0b, ace_ready=%0b", 
+                         make_unique_o, write_clean_o, read_shared_o, read_resp_en, ac_enable, ace_ready);
+                fail_count++;
+            end else begin
+                $display("PASS: Datapath side outputs are correct at time %0t", $time);
+                pass_count++;
+            end
+        end
+    endtask
+
+    task initialize_expected_controller_datapath;
+        forever begin
+            #1;
             @(posedge clk);
-            while(!ace_ready) @(posedge clk);
-            $display("REQUEST SUCCESS");
-        end       
+            expected_ace_ready    = 1'b0;
+            expected_make_unique  = 1'b0;
+            expected_write_clean  = 1'b0;
+            expected_read_shared  = 1'b0;
+            expected_read_resp_en = 1'b0;
+            expected_ac_enable    = 1'b0;
+            if (write_req) begin
+                expected_write_clean  = 1'b1;
+            end else if (read_req) begin
+                expected_read_shared  = 1'b1;
+            end else if(invalid_req) begin
+                expected_make_unique  = 1'b1;
+                if(AR_READY) begin
+                    expected_ace_ready = 1'b1;
+                end else begin
+                    @(posedge clk);
+                    expected_make_unique  = 1'b0;
+                    while(!AR_READY) @(posedge clk);
+                    @(posedge clk);
+                    expected_ace_ready = 1'b1;
+                end
+            end else if(AC_VALID) begin
+                expected_ac_enable    = 1'b1;
+            end else if(R_okay) begin
+                expected_read_resp_en = 1'b1;
+                expected_ace_ready    = 1'b1;
+            end else if(B_okay) begin
+                expected_ace_ready    = 1'b1;
+            end
+        end
     endtask
 
     task monitor_interconnect_side;
         forever begin
             @(posedge clk);
-            while(!AC_READY) @(posedge clk);
-            $display("SNOOP INITIATED");
-            @(posedge clk);
-            while(!AC_READY) @(posedge clk);
-            $display("SNOOP COMPLETED");
+            while(!rst_n || !(AW_VALID || W_VALID || B_READY || AR_VALID || R_READY || AC_READY || CD_VALID || CR_VALID)) @(posedge clk);
+            
+            // Compare only when expected value is not 'x'
+            if ((expected_AR_VALID !== 1'bx && AR_VALID != expected_AR_VALID) ||
+            (expected_AW_VALID !== 1'bx && AW_VALID != expected_AW_VALID) ||
+            (expected_W_VALID  !== 1'bx && W_VALID  != expected_W_VALID)  ||
+            (expected_B_READY  !== 1'bx && B_READY  != expected_B_READY)  ||
+            (expected_R_READY  !== 1'bx && R_READY  != expected_R_READY)  ||
+            (expected_AC_READY !== 1'bx && AC_READY != expected_AC_READY) ||
+            (expected_CR_VALID !== 1'bx && CR_VALID != expected_CR_VALID) ||
+            (expected_CD_VALID !== 1'bx && CD_VALID != expected_CD_VALID)) begin
+            $display("FAIL: Interconnect side outputs mismatch at time %0t", $time);
+            // Display expected values
+            $display("Expected: AR_VALID=%0b, AW_VALID=%0b, W_VALID=%0b, B_READY=%0b, R_READY=%0b, AC_READY=%0b, CR_VALID=%0b, CD_VALID=%0b", 
+                expected_AR_VALID, expected_AW_VALID, expected_W_VALID, expected_B_READY, expected_R_READY, expected_AC_READY, expected_CR_VALID, expected_CD_VALID);
+            // Display actual values
+            $display("Actual  : AR_VALID=%0b, AW_VALID=%0b, W_VALID=%0b, B_READY=%0b, R_READY=%0b, AC_READY=%0b, CR_VALID=%0b, CD_VALID=%0b", 
+                AR_VALID, AW_VALID, W_VALID, B_READY, R_READY, AC_READY, CR_VALID, CD_VALID);
+            fail_count_int++;
+        end else begin
+            $display("PASS: Interconnect side outputs are correct at time %0t", $time);
+            pass_count_int++;
+        end
+
         end
     endtask
 
+    task initialize_expected_interconnect;
+        static logic was_write_req, was_read_req, was_invalid_req, was_AC_VALID, was_snoop_miss;
+
+        forever begin
+            @(posedge clk);
+            // Update flags to track the state of conditions for the next cycle
+            was_write_req   = write_req;
+            was_read_req    = read_req;
+            was_invalid_req = invalid_req;
+            was_AC_VALID    = AC_VALID;
+            was_snoop_miss  = snoop_miss;
+               
+            // Reset expected values for the new cycle
+            expected_AW_VALID = #1 1'bx;
+            expected_AR_VALID = #1 1'bx;
+            expected_W_VALID  = #1 1'bx;
+            expected_B_READY  = #1 1'bx;
+            expected_R_READY  = #1 1'bx;
+            expected_AC_READY = #1 1'bx;
+            expected_CR_VALID = #1 1'bx;
+            expected_CD_VALID = #1 1'bx;
+        
+            // Conditions for write requests
+            if (write_req) begin
+                expected_AW_VALID = #1 1;                    
+            end else if (was_write_req && AW_READY) begin
+                expected_AW_VALID = #1 1;
+            end else if (was_write_req && W_READY) begin
+                expected_W_VALID = #1 1;
+            end else if (was_write_req && B_VALID) begin
+                expected_B_READY = #1 1;
+            end
+        
+            // Conditions for read requests
+            if (read_req || invalid_req) begin
+                expected_AR_VALID = #1 1;
+            end else if (was_read_req && AR_READY) begin
+                expected_AR_VALID = #1 1;
+                expected_R_READY = #1 1;
+            end else if (was_read_req && R_VALID) begin
+                expected_R_READY = #1 1;
+            end
+        
+            // Conditions for AC_VALID
+            if (AC_VALID) begin
+                expected_AC_READY = #1 1;
+            end else if (was_AC_VALID && (snoop_miss || invalid_req)) begin
+                if (response) begin
+                    expected_CR_VALID = #1 1;
+                end else if (response_data) begin
+                    expected_CR_VALID = #1 1;
+                    expected_CD_VALID = #1 1;
+                end
+            end else if (was_AC_VALID && CR_READY && CD_READY) begin
+                expected_CD_VALID = #1 1;
+                expected_CR_VALID = #1 1;
+            end else if (was_AC_VALID && CR_READY) begin
+                expected_CR_VALID = #1 1;
+            end
+
+        end
+    endtask
+    
     task call_request;
         begin
-            logic [1:0] local_var;
-            repeat(10) begin
-                local_var = $random;
+            logic [2:0] local_var;
+            repeat(100000) begin
+                local_var = $urandom;
                 case(local_var) 
-                    2'b00: drive_read_request();
-                    2'b01: drive_invalid_request();
-                    2'b10: drive_write_request();
-                    default: drive_read_request();
+                    3'b000: drive_read_request();
+                    3'b001: drive_invalid_request();
+                    3'b010: drive_write_request();
+                    3'b011: drive_snoop_miss();
+                    3'b100: drive_response();
+                    default: drive_write_request();
                 endcase
             end
         end
     endtask
 
+    initial begin
+        fork
+            monitor_datapath_controller();
+            initialize_expected_controller_datapath();
+            monitor_interconnect_side();
+            initialize_expected_interconnect();
+        join_none
+    end
+
     // Testbench execution
     initial begin
-        // Initialize inputs
         initialize_signals();
-        // Apply reset
         reset();
 
-        // call_request will call read, write and invalid requests randomly
         call_request();
 
-        // Test case for incoming snoop request 
-        // -- with snoop miss
-        drive_snoop_miss();
-        // -- with snoop hit
-        drive_response();
-
+        // Final results
+        $display("Total Passes: %0d", pass_count);
+        $display("Total Fails: %0d", fail_count);
         
-
-        // join_any
-        // fork
-        //     monitor_controller_side();
-        // join_any
-
+        $display("Total Passes interconnect side: %0d", pass_count_int);
+        $display("Total Fails interconnect side: %0d", fail_count_int);
         // Finish simulation
         @(posedge clk);
         $finish;
