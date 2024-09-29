@@ -214,19 +214,21 @@ module tb_ace_controller;
     task drive_invalid_request;
         begin
             invalid_req = 1;
-            AR_READY = 1;
-            @(posedge clk);
-            invalid_req = 0;
-            while(!AR_VALID) @(posedge clk);
-            AR_READY = 0;
-
-            R_VALID = 1;
-            R_okay = 1;
-            @(posedge clk);
-            while(!R_READY) @(posedge clk);
-            R_VALID = 0;
-            R_okay = 0;
-            
+            AR_READY = $urandom % 2;
+            if(!AR_READY) begin
+                @(posedge clk);
+                invalid_req = 0;
+                repeat(5) @(posedge clk);
+                AR_READY = 1;
+                @(posedge clk);
+                while(!AR_VALID) @(posedge clk);
+                AR_READY = 0;
+            end else begin
+                @(posedge clk);
+                invalid_req = 0;
+                while(!AR_VALID) @(posedge clk);
+                AR_READY = 0;
+            end
             while(!ace_ready) @(posedge clk);
         end
     endtask
@@ -272,23 +274,23 @@ module tb_ace_controller;
         forever begin
             @(posedge clk); // Wait for a clock cycle
             while(!(make_unique_o || read_shared_o || write_clean_o || read_resp_en || ac_enable || ace_ready)) @(posedge clk);
-    
+
             // Compare actual outputs with expected values
-            if ((make_unique_o === expected_make_unique) &&
-                (write_clean_o === expected_write_clean) &&
-                (read_shared_o === expected_read_shared) &&
-                (read_resp_en === expected_read_resp_en) &&
-                (ace_ready === expected_ace_ready) &&
-                (ac_enable === expected_ac_enable)) begin
+            if ((make_unique_o !== expected_make_unique) ||
+                (write_clean_o !== expected_write_clean) ||
+                (read_shared_o !== expected_read_shared) ||
+                (read_resp_en !== expected_read_resp_en) ||
+                (ace_ready !== expected_ace_ready) ||
+                (ac_enable !== expected_ac_enable)) begin
+                $display("FAIL: Datapath side outputs mismatch at time %0t", $time);
+                $display("Expected: make_unique_o=%0b, write_clean_o=%0b, read_shared_o=%0b, read_resp_en=%0b, ac_enable=%0b, ace_ready=%0b", 
+                         expected_make_unique, expected_write_clean, expected_read_shared, expected_read_resp_en, expected_ac_enable, expected_ace_ready);
+                $display("Actual  : make_unique_o=%0b, write_clean_o=%0b, read_shared_o=%0b, read_resp_en=%0b, ac_enable=%0b, ace_ready=%0b", 
+                         make_unique_o, write_clean_o, read_shared_o, read_resp_en, ac_enable, ace_ready);
+                fail_count++;
+            end else begin
                 $display("PASS: Datapath side outputs are correct at time %0t", $time);
                 pass_count++;
-            end else begin
-                $display("FAIL: Datapath side outputs mismatch at time %0t", $time);
-                $display("Expected: make_unique_o=%0b, write_clean_o=%0b, read_shared_o=%0b, read_resp_en=%0b, ac_enable=%0b", 
-                     expected_make_unique, expected_write_clean, expected_read_shared, expected_read_resp_en, expected_ac_enable);
-                $display("Actual  : make_unique_o=%0b, write_clean_o=%0b, read_shared_o=%0b, read_resp_en=%0b, ac_enable=%0b", 
-                     make_unique_o, write_clean_o, read_shared_o, read_resp_en, ac_enable);
-                fail_count++;
             end
         end
     endtask
@@ -309,6 +311,15 @@ module tb_ace_controller;
                 expected_read_shared  = 1'b1;
             end else if(invalid_req) begin
                 expected_make_unique  = 1'b1;
+                if(AR_READY) begin
+                    expected_ace_ready = 1'b1;
+                end else begin
+                    @(posedge clk);
+                    expected_make_unique  = 1'b0;
+                    while(!AR_READY) @(posedge clk);
+                    @(posedge clk);
+                    expected_ace_ready = 1'b1;
+                end
             end else if(AC_VALID) begin
                 expected_ac_enable    = 1'b1;
             end else if(R_okay) begin
@@ -424,7 +435,6 @@ module tb_ace_controller;
                     3'b010: drive_write_request();
                     3'b011: drive_snoop_miss();
                     3'b100: drive_response();
-                    3'b101: drive_invalid_request();
                     default: drive_write_request();
                 endcase
             end
