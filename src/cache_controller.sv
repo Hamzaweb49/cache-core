@@ -113,7 +113,7 @@ always_comb begin
     case(state)
         IDLE: begin
             cache_ready         = 1;
-            if((read_hit_en || write_hit_en)) begin
+            if((read_en || write_en)) begin
                 next_state = PROCESS_REQUEST;
             end else begin
                 next_state = IDLE;
