@@ -71,7 +71,7 @@ always_comb begin
         5'b00100: new_state = 3'b010; // new_SC
         5'b00010: new_state = 3'b011; // new_SD
         5'b00001: new_state = 3'b100; // new_invalid
-        default:  new_state = 3'b100; // Fallback state
+        default:  new_state = 3'b000; // Fallback state
     endcase
 end
 
