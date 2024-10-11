@@ -121,7 +121,7 @@ always_comb begin
         end
 
         PROCESS_REQUEST: begin
-            if(cache_hit && read_hit_en) begin
+            if(cache_hit && read_hit_en && !current_invalid) begin
                 cache_ready     = 1;
                 cache_complete  = 1;
                 next_state      = IDLE;
@@ -194,7 +194,7 @@ always_comb begin
 
         INVALIDATE: begin
             if(!ace_ready) begin
-                next_state = INVALIDATE; 
+                next_state = INVALIDATE;
             end 
             else if(ace_ready) begin
                 cache_complete  = 1;
