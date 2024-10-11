@@ -1,4 +1,3 @@
-
 module tb_top_level;
 
     // Parameters
@@ -87,7 +86,10 @@ module tb_top_level;
     logic [31:0] CD_DATA_dummy1;
     
     // Dummy main memory
-    logic [31:0] main_mem[15:0];
+    logic [31:0] main_mem[7:0];
+
+    int pass_count = 0;
+    int fail_count = 0;
 
     // Instantiate the top-level module
     top_level #(
@@ -164,7 +166,7 @@ module tb_top_level;
     task initialize_memory;
         integer i;
         begin
-            for (i = 0; i < 16; i = i + 1) begin
+            for (i = 0; i < 8; i = i + 1) begin
                 main_mem[i] = 32'hDEEDFEED;  // Assign 0 to each memory entry
             end
         end
@@ -209,15 +211,18 @@ module tb_top_level;
 
     // Dummy CPU
     task dummy_cpu;
-        forever begin
-            @(posedge clk);
-            if($urandom % 9) begin
-                // cpu_request = 2'b11; // IDLE
-                driver_cpu();
-            end else begin
-                driver_cpu();
+        integer i;
+        begin 
+            for (i=0; i < 100; i++) begin
+                @(posedge clk);
+                if($urandom % 9) begin
+                    cpu_request = 2'b11; // IDLE
+                    // driver_cpu();
+                end else begin
+                    driver_cpu();
+                end
+                while(!cache_ready) @(posedge clk);
             end
-            while(!cache_ready) @(posedge clk);
         end
     endtask
     // CPU SIDE DRIVER
@@ -230,6 +235,7 @@ module tb_top_level;
             @(posedge clk);
             while(!cache_ready) @(posedge clk);
             cpu_request = 2'b11; 
+            @(posedge clk)
             while(!cache_complete) @(posedge clk);
         end
     endtask
@@ -241,7 +247,11 @@ module tb_top_level;
                 3'b000: cpu_addr = 32'h0000_0000;
                 3'b001: cpu_addr = 32'h0000_0008; // different index
                 3'b010: cpu_addr = 32'h0000_000C; // different index
-                default: cpu_addr = 32'h0000_00000;
+                3'b011: cpu_addr = 32'h0000_001C;
+                3'b100: cpu_addr = 32'h0000_0018;
+                3'b101: cpu_addr = 32'h0100_0018;
+                3'b110: cpu_addr = 32'h0100_000C;
+                default: cpu_addr = 32'h0000_0000;
             endcase
         end
     endtask
@@ -273,7 +283,8 @@ module tb_top_level;
     // INTERCONNECT
     task dummy_interconnect;
         forever begin
-            @(posedge clk);
+            // @(posedge clk);
+            #1;
             AR_READY = 1;
             AW_READY = 1;
             W_READY  = 1;
@@ -284,161 +295,176 @@ module tb_top_level;
             CD_READY = 1;
 
             @(posedge clk);
-            while(!AR_VALID && !AW_VALID) @(posedge clk);
+            while(!AR_VALID && !AW_VALID && !AC_READY) @(posedge clk);
             if(AR_VALID) begin
-                AW_READY = 0;
-                CR_READY = 0;
-                CD_READY = 0;
-                W_READY  = 0;
-                AC_VALID_dummy1 = 1;
+                AR_READY = 0;
                 AC_ADDR_dummy1   = AR_ADDR;
-                AC_ADDR_main_mem = AR_ADDR;
                 case({AR_BAR[0], AR_DOMAIN, AR_SNOOP}) 
                     7'b0_10_0001: AC_SNOOP_dummy1 = 4'b0001; // Read shared 
                     7'b0_10_1100: AC_SNOOP_dummy1 = 4'b0111; // Make unique
                 endcase
-                @(posedge clk);
-                while(!AC_READY_dummy1) @(posedge clk)
-                AC_VALID_dummy1 = 0;
-                CR_READY_dummy1 = 1;
-                @(posedge clk);
-                while(!CR_VALID_dummy1) @(posedge clk);
-                CR_READY_dummy1 = 0;
-                case(CR_RESP_dummy1)
-                    5'b00000: begin
-                        R_VALID = 1;
-                        RDATA = main_mem[AC_ADDR_main_mem]; 
-                        RRESP = 4'b0000;
+                dummy_cache(AC_ADDR_dummy1);                
+               
+                if(AC_SNOOP_dummy1 == 4'b0111) begin
+                    if(CR_RESP_dummy1 == 5'b00101) begin
+                        main_mem[AC_ADDR_dummy1[4:2]] = CD_DATA_dummy1;
+                        AR_READY = 1;
                         @(posedge clk);
-                        while(!R_READY) @(posedge clk);
-                        R_VALID = 0;
-                    end
-                    5'b00001: begin
-                        CD_READY_dummy1 = 1;
+                        while(!AR_VALID) @(posedge clk);
+                        AR_READY = 0;
+                    end 
+                    else begin
+                        AR_READY = 1;
                         @(posedge clk);
-                        while(!CD_VALID_dummy1) @(posedge clk);
-                        CD_READY_dummy1 = 0;
-                        R_VALID = 1;
-                        RDATA = CD_DATA_dummy1;
-                        RRESP = 4'b0000;
-                        @(posedge clk);
-                        while(!R_READY) @(posedge clk);
-                        R_VALID = 0;                       
-                    end
-                    5'b01001: begin
-                        CD_READY_dummy1 = 1;
-                        @(posedge clk);
-                        while(!CD_VALID_dummy1) @(posedge clk);
-                        CD_READY_dummy1 = 0;
-                        RDATA = CD_DATA_dummy1;
-                        RRESP = 4'b1000;
-                        R_VALID = 1;
-                        @(posedge clk);
-                        while(!R_READY) @(posedge clk);
-                        R_VALID = 0;  
-                    end
-                    5'b00101: begin
-                        CD_READY_dummy1 = 1;
-                        @(posedge clk);
-                        while(!CD_VALID_dummy1) @(posedge clk);
-                        CD_READY_dummy1 = 0;
-                        RDATA = CD_DATA_dummy1;
-                        RRESP = 4'b1000;
-                        R_VALID = 1;
-                        @(posedge clk);
-                        while(!R_READY) @(posedge clk);
-                        R_VALID = 0;   
-                    end
-                    default: begin
-                        RDATA = main_mem[AC_ADDR_main_mem];
-                        RRESP = 4'b0000;
-                        R_VALID = 1;
-                        @(posedge clk);
-                        while(!R_READY) @(posedge clk);
-                        R_VALID = 0;  
-                    end
-                endcase
+                        while(!AR_VALID) @(posedge clk);
+                        AR_READY = 0;
+                    end        
+                end else if(AC_SNOOP_dummy1 == 4'b0001) begin
+                    case(CR_RESP_dummy1)
+                        5'b00000: begin
+                            R_VALID = 1;
+                            RDATA = main_mem[AC_ADDR_main_mem[4:2]]; 
+                            RRESP = 4'b0000;
+                            @(posedge clk);
+                            while(!R_READY) @(posedge clk);
+                            R_VALID = 0;
+                        end
+                        5'b00001: begin
+                            R_VALID = 1;
+                            RDATA = CD_DATA_dummy1;
+                            RRESP = 4'b0000;
+                            @(posedge clk);
+                            while(!R_READY) @(posedge clk);
+                            R_VALID = 0;                       
+                        end
+                        5'b01001: begin
+                            RDATA = CD_DATA_dummy1;
+                            RRESP = 4'b1000;
+                            R_VALID = 1;
+                            @(posedge clk);
+                            while(!R_READY) @(posedge clk);
+                            R_VALID = 0;  
+                        end
+                        default: begin
+                            RDATA = main_mem[AC_ADDR_main_mem[4:2]];
+                            RRESP = 4'b1100;
+                            R_VALID = 1;
+                            @(posedge clk);
+                            while(!R_READY) @(posedge clk);
+                            R_VALID = 0;  
+                        end
+                    endcase
+                end
             end else if(AW_VALID) begin
-                AR_READY = 0;
-                CR_READY = 0;
-                CD_READY = 0;
                 AC_ADDR_main_mem = AW_ADDR;
+                AW_READY = 0;
                 W_READY = 1;
-                // case(AW_BAR[0], AW_DOMAIN, AW_SNOOP)
                 @(posedge clk);
                 while(!W_VALID) @(posedge clk);
-                main_mem[AC_ADDR_main_mem] = W_DATA;
+                main_mem[AW_ADDR[4:2]] = W_DATA;
                 W_READY = 0;
                 B_VALID = 1;
                 BRESP   = 2'b00;
                 @(posedge clk);
                 while(!B_READY) @(posedge clk);
                 B_VALID = 0;
-                // endcase
             end
+                // #1;
+            // else if(AC_READY) begin
+            //     // #1;
+            //     // drive_snoop();
+            //     if(!AR_VALID && !AW_VALID) begin
+            //         AC_VALID = 1;
+            //         AC_ADDR  = 32'h0000_0000;
+            //         @(posedge clk);
+            //         while(!AC_READY) @(posedge clk);
+            //         AC_VALID = 0;
+            //         CR_READY = 1;
+            //         @(posedge clk);
+            //         while(!CR_VALID) @(posedge clk);
+            //         CR_READY = 0;
+            //         if(!(CR_RESP == 5'b00000)) begin
+            //             CD_READY = 1;
+            //             @(posedge clk);
+            //             while(!CD_VALID) @(posedge clk);
+            //             CD_READY = 0;
+            //         end 
+            //     end
+            // end
         end
     endtask
-
-    task dummy_cache1;
-        logic local_var;
-        forever begin
-            local_var = $urandom;
-            AC_READY_dummy1 = 1;
-            @(posedge clk);
-            while(!AC_VALID_dummy1) @(posedge clk);
-            AC_READY_dummy1 = 0;
-            case(AC_SNOOP)
-                4'b0000, 4'b0001, 4'b0010, 4'b0011: begin
-                    if(local_var) begin
-                        CR_RESP_dummy1 = 5'b00000; // Data not present
-                        response_dummy_cache();
+    task dummy_cache(input logic [31:0]AC_ADDR_dummy1_i);
+        // Declare a static variable to check if initialization has been done
+        static logic cache_initialized = 0;
+        logic [2:0] index_ac;
+        logic invalid_ac;
+        // logic [26:0] tag_ac;
+    
+        begin
+            typedef struct packed {
+                logic [31:0] data;
+                logic [26:0] tag;
+                logic        valid_bit;
+                logic [2:0]  state;
+            } dummy_cache_line;
+    
+            dummy_cache_line cache_1 [7:0];  // Array of 8 cache lines
+    
+            // Initialize cache lines only once
+            // if (!cache_initialized) begin
+                for (int i = 0; i < 8; i++) begin
+                    cache_1[i].data      = 32'hDEADBEF0 + i;  // Example: Unique data for each cache line
+                    cache_1[i].tag       = 27'h0000000 + i;   // Example: Unique tag for each cache line
+                    cache_1[i].valid_bit = 1'b1;              // Set all cache lines as valid
+    
+                    // Set different states based on the index
+                    if (i == 0) begin
+                        cache_1[i].state = 3'b011; // Shared dirty
+                    end else if (i == 2) begin
+                        cache_1[i].state = 3'b010; // Shared clean
                     end else begin
-                        CR_RESP_dummy1 = 5'b01001; // Data present and is in shared state
-                        response_dummy_cache();
-                        CD_DATA_dummy1 = 32'hFACEFABE;
-                        data_dummy_cache();
-                    end 
+                        cache_1[i].state = 3'b100; // Invalid
+                    end
+                // end
+                // cache_initialized = 1;  // Set the flag to indicate initialization is done
+            end
+            index_ac = AC_ADDR_dummy1_i[4:2];
+            invalid_ac = (cache_1[index_ac].state == 3'b100) ? 1 : 0;
+
+            @(posedge clk);
+            case(AC_SNOOP_dummy1)
+                4'b0001: begin
+                    if(!invalid_ac) begin
+                        CD_DATA_dummy1 = cache_1[index_ac].data;
+                        if(!(cache_1[index_ac].state == 3'b100)) begin
+                            CR_RESP_dummy1 = 5'b01001;
+                        end else begin
+                            CR_RESP_dummy1 = 5'b00001;
+                        end
+                    end else begin
+                        CR_RESP_dummy1 = 5'b00000;
+                    end
                 end
                 4'b0111: begin
-                    if(local_var) begin // Not present
-                        CR_RESP_dummy1 = 5'b00000;
-                        response_dummy_cache();
+                    if(!invalid_ac) begin
+                        CD_DATA_dummy1 = cache_1[index_ac].data;
+                        if(cache_1[index_ac].state == 3'b011) begin
+                            CR_RESP_dummy1 = 5'b00101;
+                        end else begin
+                            CR_RESP_dummy1 = 5'b00001;
+                        end    
                     end else begin
-                        CR_RESP_dummy1 = 5'b00101; // Data present and is in shared state
-                        response_dummy_cache();
-                        CD_DATA_dummy1 = 32'hFACEFABE;
-                        data_dummy_cache(); 
+                        CR_RESP_dummy1 = 5'b00000;
                     end
+                end
+                default: begin
+                    CR_RESP_dummy1 = 5'b11111;  // Invalid snoop request
                 end
             endcase
         end
     endtask
 
-    task response_dummy_cache;
-        begin
-            CR_VALID_dummy1 = 1;
-            @(posedge clk);
-            while(!CR_READY_dummy1) @(posedge clk);
-            CR_VALID_dummy1 = 0;
-        end
-    endtask
-    task data_dummy_cache;
-        begin
-            CD_VALID_dummy1 = 1;
-            @(posedge clk);
-            while(!CD_READY_dummy1) @(posedge clk);
-            CD_VALID_dummy1 = 0;
-        end
-    endtask
-
-    // initial begin
-    //     fork
-    //         dummy_interconnect();
-    //         dummy_cpu();
-    //         dummy_cache1();
-    //     join_none
-    // end
-
+    
     initial begin
         integer i;
         // Initialize inputs 
@@ -447,27 +473,26 @@ module tb_top_level;
         initialize_memory();
         // Apply reset
         reset();
+         // Display initial values of main_mem
+        $display("Initial values of main_mem:");
+        for (i = 0; i < 8; i++) begin
+            $display("main_mem[%0d] = %h", i, main_mem[i]); // Display in hex format
+        end
 
         fork
             dummy_interconnect();
             dummy_cpu();
-            dummy_cache1();
-        join_none
+        join_any
 
-        // Display initial values of main_mem
-        $display("Initial values of main_mem:");
-        for (i = 0; i < 16; i++) begin
-            $display("main_mem[%0d] = %h", i, main_mem[i]); // Display in hex format
-        end
-
-        repeat(100) @(posedge clk);
+        @(posedge clk);
 
         $display("Final values of main_mem:");
-        for (i = 0; i < 16; i++) begin
+        for (i = 0; i < 8; i++) begin
             $display("main_mem[%0d] = %h", i, main_mem[i]); // Display in hex format
         end
 
         $finish;
     end
+
 
 endmodule
