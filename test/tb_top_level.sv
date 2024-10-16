@@ -91,6 +91,19 @@ module tb_top_level;
     int pass_count = 0;
     int fail_count = 0;
 
+     // Reference Cache Definition
+    typedef struct packed {
+        logic [31:0] data;
+        logic [26:0] tag;
+        logic valid_bit;
+    } cache_line;
+
+    cache_line ref_cache [7:0];  // Reference cache with 8 lines
+     // Index and tag extracted from the address
+    logic [2:0] ref_index;
+    logic [26:0] ref_tag;
+    logic [31:0] ref_rdata;
+
     // Instantiate the top-level module
     top_level #(
         .WIDTH_A(WIDTH_A),
@@ -213,11 +226,10 @@ module tb_top_level;
     task dummy_cpu;
         integer i;
         begin 
-            for (i=0; i < 100; i++) begin
+            for (i=0; i < 1000; i++) begin
                 @(posedge clk);
                 if($urandom % 9) begin
                     cpu_request = 2'b11; // IDLE
-                    // driver_cpu();
                 end else begin
                     driver_cpu();
                 end
@@ -283,7 +295,6 @@ module tb_top_level;
     // INTERCONNECT
     task dummy_interconnect;
         forever begin
-            // @(posedge clk);
             #1;
             AR_READY = 1;
             AW_READY = 1;
@@ -323,7 +334,7 @@ module tb_top_level;
                     case(CR_RESP_dummy1)
                         5'b00000: begin
                             R_VALID = 1;
-                            RDATA = main_mem[AC_ADDR_main_mem[4:2]]; 
+                            RDATA = main_mem[AR_ADDR[4:2]]; 
                             RRESP = 4'b0000;
                             @(posedge clk);
                             while(!R_READY) @(posedge clk);
@@ -346,7 +357,7 @@ module tb_top_level;
                             R_VALID = 0;  
                         end
                         default: begin
-                            RDATA = main_mem[AC_ADDR_main_mem[4:2]];
+                            RDATA = main_mem[AR_ADDR[4:2]];
                             RRESP = 4'b1100;
                             R_VALID = 1;
                             @(posedge clk);
@@ -369,28 +380,6 @@ module tb_top_level;
                 while(!B_READY) @(posedge clk);
                 B_VALID = 0;
             end
-                // #1;
-            // else if(AC_READY) begin
-            //     // #1;
-            //     // drive_snoop();
-            //     if(!AR_VALID && !AW_VALID) begin
-            //         AC_VALID = 1;
-            //         AC_ADDR  = 32'h0000_0000;
-            //         @(posedge clk);
-            //         while(!AC_READY) @(posedge clk);
-            //         AC_VALID = 0;
-            //         CR_READY = 1;
-            //         @(posedge clk);
-            //         while(!CR_VALID) @(posedge clk);
-            //         CR_READY = 0;
-            //         if(!(CR_RESP == 5'b00000)) begin
-            //             CD_READY = 1;
-            //             @(posedge clk);
-            //             while(!CD_VALID) @(posedge clk);
-            //             CD_READY = 0;
-            //         end 
-            //     end
-            // end
         end
     endtask
     task dummy_cache(input logic [31:0]AC_ADDR_dummy1_i);
@@ -398,8 +387,7 @@ module tb_top_level;
         static logic cache_initialized = 0;
         logic [2:0] index_ac;
         logic invalid_ac;
-        // logic [26:0] tag_ac;
-    
+
         begin
             typedef struct packed {
                 logic [31:0] data;
@@ -411,22 +399,19 @@ module tb_top_level;
             dummy_cache_line cache_1 [7:0];  // Array of 8 cache lines
     
             // Initialize cache lines only once
-            // if (!cache_initialized) begin
-                for (int i = 0; i < 8; i++) begin
-                    cache_1[i].data      = 32'hDEADBEF0 + i;  // Example: Unique data for each cache line
-                    cache_1[i].tag       = 27'h0000000 + i;   // Example: Unique tag for each cache line
-                    cache_1[i].valid_bit = 1'b1;              // Set all cache lines as valid
-    
-                    // Set different states based on the index
-                    if (i == 0) begin
-                        cache_1[i].state = 3'b011; // Shared dirty
-                    end else if (i == 2) begin
-                        cache_1[i].state = 3'b010; // Shared clean
-                    end else begin
-                        cache_1[i].state = 3'b100; // Invalid
-                    end
-                // end
-                // cache_initialized = 1;  // Set the flag to indicate initialization is done
+            for (int i = 0; i < 8; i++) begin
+                cache_1[i].data      = 32'hDEADBEF0 + i;  // Example: Unique data for each cache line
+                cache_1[i].tag       = 27'h0000000 + i;   // Example: Unique tag for each cache line
+                cache_1[i].valid_bit = 1'b1;              // Set all cache lines as valid
+
+                // Set different states based on the index
+                if (i == 0) begin
+                    cache_1[i].state = 3'b011; // Shared dirty
+                end else if (i == 2) begin
+                    cache_1[i].state = 3'b010; // Shared clean
+                end else begin
+                    cache_1[i].state = 3'b100; // Invalid
+                end
             end
             index_ac = AC_ADDR_dummy1_i[4:2];
             invalid_ac = (cache_1[index_ac].state == 3'b100) ? 1 : 0;
@@ -464,6 +449,57 @@ module tb_top_level;
         end
     endtask
 
+    // Cache Initialization Task
+    task initialize_cache();
+        for (int i = 0; i < 8; i++) begin
+            ref_cache[i].data      = 32'b0;
+            ref_cache[i].tag       = 27'b0;
+            ref_cache[i].valid_bit = 1'b0;  // Invalidate all lines initially
+        end
+        $display("Reference cache initialized to zero.");
+    endtask
+    task reference_cache;
+        forever begin
+            #1;
+            // Extract index and tag from the address
+            ref_index = cpu_addr[4:2];
+            ref_tag = cpu_addr[31:5];
+    
+            // Handle write request
+            if (cpu_request == 2'b01) begin
+                ref_cache[ref_index].data      = cpu_wdata;
+                ref_cache[ref_index].tag       = ref_tag;
+                ref_cache[ref_index].valid_bit = 1'b1;  // Set valid bit
+            end
+            // Handle read request
+            else if (cpu_request == 2'b00) begin
+                ref_rdata = ref_cache[ref_index].data;
+            end
+        end
+    endtask
+    task monitor_cache;
+        // Forever monitor for read requests
+        logic [31:0] monitor_addr;
+        forever begin
+            #1;
+            // Wait for a read request
+            if (cpu_request == 2'b00) begin  // 2'b00 for read request
+                monitor_addr = cpu_addr;
+                // Check if the cache is ready to provide data
+                @(posedge clk);
+                while (!cache_ready) @(posedge clk);
+
+                // Compare the DUT cache read data with the reference cache
+                if ((cpu_request == 2'b00) && (cpu_rdata !== ref_rdata)) begin
+                    $display("Mismatch on read: DUT read %h, expected %h at address %h at time: %0d", cpu_rdata, ref_rdata, monitor_addr, $time);
+                    fail_count++;
+                end else begin
+                    $display("Read correct: DUT read %h matches expected %h at address %h at time: %0d", cpu_rdata, ref_rdata, monitor_addr, $time);
+                    pass_count++;
+                end 
+            end
+        end
+    endtask
     
     initial begin
         integer i;
@@ -471,6 +507,8 @@ module tb_top_level;
         initialize();
         // Initialize main memory
         initialize_memory();
+        // Initialize referene model
+        initialize_cache();
         // Apply reset
         reset();
          // Display initial values of main_mem
@@ -480,12 +518,22 @@ module tb_top_level;
         end
 
         fork
+            reference_cache();
+            monitor_cache();
+        join_none
+
+        fork
             dummy_interconnect();
             dummy_cpu();
         join_any
 
         @(posedge clk);
+        // Display pass and fail counts
+        $display("\nSimulation Summary:");
+        $display("Total Pass Count: %0d", pass_count);
+        $display("Total Fail Count: %0d", fail_count);
 
+        // Final values in main memory
         $display("Final values of main_mem:");
         for (i = 0; i < 8; i++) begin
             $display("main_mem[%0d] = %h", i, main_mem[i]); // Display in hex format
@@ -493,6 +541,5 @@ module tb_top_level;
 
         $finish;
     end
-
 
 endmodule
