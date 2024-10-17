@@ -88,6 +88,8 @@ module tb_top_level;
     // Dummy main memory
     logic [31:0] main_mem[7:0];
 
+    logic [31:0] ref_rdata;
+
     int pass_count = 0;
     int fail_count = 0;
 
@@ -99,10 +101,9 @@ module tb_top_level;
     } cache_line;
 
     cache_line ref_cache [7:0];  // Reference cache with 8 lines
-     // Index and tag extracted from the address
+    // Index and tag extracted from the address
     logic [2:0] ref_index;
     logic [26:0] ref_tag;
-    logic [31:0] ref_rdata;
 
     // Instantiate the top-level module
     top_level #(
@@ -226,7 +227,7 @@ module tb_top_level;
     task dummy_cpu;
         integer i;
         begin 
-            for (i=0; i < 1000; i++) begin
+            for (i=0; i < 1000000; i++) begin
                 @(posedge clk);
                 if($urandom % 9) begin
                     cpu_request = 2'b11; // IDLE
@@ -263,6 +264,7 @@ module tb_top_level;
                 3'b100: cpu_addr = 32'h0000_0018;
                 3'b101: cpu_addr = 32'h0100_0018;
                 3'b110: cpu_addr = 32'h0100_000C;
+                3'b111: cpu_addr = 32'h0100_0008;
                 default: cpu_addr = 32'h0000_0000;
             endcase
         end
@@ -387,7 +389,7 @@ module tb_top_level;
         static logic cache_initialized = 0;
         logic [2:0] index_ac;
         logic invalid_ac;
-
+    
         begin
             typedef struct packed {
                 logic [31:0] data;
@@ -471,26 +473,34 @@ module tb_top_level;
                 ref_cache[ref_index].tag       = ref_tag;
                 ref_cache[ref_index].valid_bit = 1'b1;  // Set valid bit
             end
+    
             // Handle read request
             else if (cpu_request == 2'b00) begin
+                while(!cache_complete) begin
+                    #1;
+                    if(R_READY && R_VALID) begin
+                        ref_cache[ref_index].data = RDATA;
+                    end
+                end
                 ref_rdata = ref_cache[ref_index].data;
             end
+
         end
     endtask
     task monitor_cache;
         // Forever monitor for read requests
         logic [31:0] monitor_addr;
         forever begin
-            #1;
             // Wait for a read request
+            #1;
             if (cpu_request == 2'b00) begin  // 2'b00 for read request
                 monitor_addr = cpu_addr;
                 // Check if the cache is ready to provide data
                 @(posedge clk);
-                while (!cache_ready) @(posedge clk);
+                while (!cache_complete) @(posedge clk);
 
                 // Compare the DUT cache read data with the reference cache
-                if ((cpu_request == 2'b00) && (cpu_rdata !== ref_rdata)) begin
+                if (cpu_rdata !== ref_rdata) begin
                     $display("Mismatch on read: DUT read %h, expected %h at address %h at time: %0d", cpu_rdata, ref_rdata, monitor_addr, $time);
                     fail_count++;
                 end else begin
@@ -507,8 +517,6 @@ module tb_top_level;
         initialize();
         // Initialize main memory
         initialize_memory();
-        // Initialize referene model
-        initialize_cache();
         // Apply reset
         reset();
          // Display initial values of main_mem
@@ -516,6 +524,7 @@ module tb_top_level;
         for (i = 0; i < 8; i++) begin
             $display("main_mem[%0d] = %h", i, main_mem[i]); // Display in hex format
         end
+        initialize_cache();
 
         fork
             reference_cache();
@@ -541,5 +550,6 @@ module tb_top_level;
 
         $finish;
     end
+
 
 endmodule
