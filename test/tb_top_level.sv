@@ -227,7 +227,7 @@ module tb_top_level;
     task dummy_cpu;
         integer i;
         begin 
-            for (i=0; i < 1000000; i++) begin
+            for (i=0; i < 5000000; i++) begin
                 @(posedge clk);
                 if($urandom % 9) begin
                     cpu_request = 2'b11; // IDLE
@@ -253,18 +253,26 @@ module tb_top_level;
         end
     endtask
     task address_select;
-        logic [2:0] local_var;
+        logic [3:0] local_var;
         begin
             local_var = $urandom;
             case(local_var) 
-                3'b000: cpu_addr = 32'h0000_0000;
-                3'b001: cpu_addr = 32'h0000_0008; // different index
-                3'b010: cpu_addr = 32'h0000_000C; // different index
-                3'b011: cpu_addr = 32'h0000_001C;
-                3'b100: cpu_addr = 32'h0000_0018;
-                3'b101: cpu_addr = 32'h0100_0018;
-                3'b110: cpu_addr = 32'h0100_000C;
-                3'b111: cpu_addr = 32'h0100_0008;
+                4'b0000: cpu_addr = 32'h0000_0000;
+                4'b0001: cpu_addr = 32'h0000_0008; // different index
+                4'b0010: cpu_addr = 32'h0000_000C; // different index
+                4'b0011: cpu_addr = 32'h0000_001C;
+                4'b0100: cpu_addr = 32'h0000_0018;
+                4'b0101: cpu_addr = 32'h0100_0018;
+                4'b0110: cpu_addr = 32'h0100_000C;
+                4'b0111: cpu_addr = 32'h0100_0008;
+                4'b1000: cpu_addr = 32'h0200_0010;
+                4'b1001: cpu_addr = 32'h0200_0014;
+                4'b1010: cpu_addr = 32'h0200_0020;
+                4'b1011: cpu_addr = 32'h0200_0024;
+                4'b1100: cpu_addr = 32'h0300_0000;
+                4'b1101: cpu_addr = 32'h0300_0004;
+                4'b1110: cpu_addr = 32'h0300_000C;
+                4'b1111: cpu_addr = 32'h0300_0010;
                 default: cpu_addr = 32'h0000_0000;
             endcase
         end
@@ -277,6 +285,7 @@ module tb_top_level;
                 2'b00: cpu_wdata = 32'hDEADBEEF;
                 2'b01: cpu_wdata = 32'hABCDABCD;
                 2'b10: cpu_wdata = 32'hFEEDBEEF;
+                2'b11: cpu_wdata = 32'hBEEFDEAD;
                 default: cpu_wdata = 32'hDEADBEEF;
             endcase
         end
