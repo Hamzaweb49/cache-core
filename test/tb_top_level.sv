@@ -177,11 +177,12 @@ module tb_top_level;
         forever #5 clk = ~clk;
     end
 
+    // Initialize main memory with some values
     task initialize_memory;
         integer i;
         begin
             for (i = 0; i < 8; i = i + 1) begin
-                main_mem[i] = 32'hDEEDFEED;  // Assign 0 to each memory entry
+                main_mem[i] = 32'hDEEDFEED; 
             end
         end
     endtask
@@ -200,10 +201,6 @@ module tb_top_level;
         AR_READY = 1;
         R_VALID = 0;
         AC_VALID = 0;
-        // AC_ADDR = 32'h00000000;
-        // AC_SNOOP = 4'b000;
-        // R_DATA = 32'h00000000;
-        // R_RESP = 4'b0000;
         CR_READY = 1;
         CD_READY = 1;
     end
@@ -227,12 +224,13 @@ module tb_top_level;
     task dummy_cpu;
         integer i;
         begin 
+            // Perform it many times ----- CPU will be idle for some time and will drive write/read requests at other
             for (i=0; i < 5000000; i++) begin
                 @(posedge clk);
                 if($urandom % 9) begin
                     cpu_request = 2'b11; // IDLE
                 end else begin
-                    driver_cpu();
+                    driver_cpu();        // Drive random cpu request 
                 end
                 while(!cache_ready) @(posedge clk);
             end
@@ -257,11 +255,12 @@ module tb_top_level;
         begin
             local_var = $urandom;
             case(local_var) 
+                // Random addresses from cpu
                 4'b0000: cpu_addr = 32'h0000_0000;
                 4'b0001: cpu_addr = 32'h0000_0008; // different index
                 4'b0010: cpu_addr = 32'h0000_000C; // different index
                 4'b0011: cpu_addr = 32'h0000_001C;
-                4'b0100: cpu_addr = 32'h0000_0018;
+                4'b0100: cpu_addr = 32'h0000_0018; 
                 4'b0101: cpu_addr = 32'h0100_0018;
                 4'b0110: cpu_addr = 32'h0100_000C;
                 4'b0111: cpu_addr = 32'h0100_0008;
@@ -282,6 +281,7 @@ module tb_top_level;
         begin
             local_var = $urandom;
             case(local_var)
+                // Random write data from cpu 
                 2'b00: cpu_wdata = 32'hDEADBEEF;
                 2'b01: cpu_wdata = 32'hABCDABCD;
                 2'b10: cpu_wdata = 32'hFEEDBEEF;
@@ -295,9 +295,9 @@ module tb_top_level;
         begin
             local_var = $urandom;
             case(local_var)
+                // Random request from cpu
                 1'b0: cpu_request = 2'b00; // Read request
                 1'b1: cpu_request = 2'b01; // Write request
-                // 2'b11: cpu_request = 2'b11; // IDLE
                 default: cpu_request = 2'b00;
             endcase
         end
@@ -393,9 +393,9 @@ module tb_top_level;
             end
         end
     endtask
+
+    // Assume a cache connected with the same interconnect as our DUT Cache
     task dummy_cache(input logic [31:0]AC_ADDR_dummy1_i);
-        // Declare a static variable to check if initialization has been done
-        static logic cache_initialized = 0;
         logic [2:0] index_ac;
         logic invalid_ac;
     
@@ -469,6 +469,8 @@ module tb_top_level;
         end
         $display("Reference cache initialized to zero.");
     endtask
+
+    // Reference cache
     task reference_cache;
         forever begin
             #1;
@@ -496,6 +498,8 @@ module tb_top_level;
 
         end
     endtask
+
+    // Monitor the read data from the cache
     task monitor_cache;
         // Forever monitor for read requests
         logic [31:0] monitor_addr;
@@ -508,7 +512,7 @@ module tb_top_level;
                 @(posedge clk);
                 while (!cache_complete) @(posedge clk);
 
-                // Compare the DUT cache read data with the reference cache
+                // Compare the DUT cache read data with the reference cache data
                 if (cpu_rdata !== ref_rdata) begin
                     $display("Mismatch on read: DUT read %h, expected %h at address %h at time: %0d", cpu_rdata, ref_rdata, monitor_addr, $time);
                     fail_count++;
@@ -524,16 +528,21 @@ module tb_top_level;
         integer i;
         // Initialize inputs 
         initialize();
+        
         // Initialize main memory
         initialize_memory();
+        
+        // Initialize reference model
+        initialize_cache();
+
         // Apply reset
         reset();
-         // Display initial values of main_mem
+        
+        // Display initial values of main_mem
         $display("Initial values of main_mem:");
         for (i = 0; i < 8; i++) begin
             $display("main_mem[%0d] = %h", i, main_mem[i]); // Display in hex format
         end
-        initialize_cache();
 
         fork
             reference_cache();
