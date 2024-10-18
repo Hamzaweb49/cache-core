@@ -104,14 +104,14 @@ always_ff @(posedge clk or negedge rst_n) begin
     end else if(invalid_req) begin
         read_op    <= 0;
         invalid_op <= 1;
-    end 
+    end
 end 
 
 always_ff @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
-        current_state <= #1 IDLE;
+        current_state <= IDLE;
     end else begin
-        current_state <= #1 next_state;
+        current_state <= next_state;
     end
 end
 
@@ -155,12 +155,7 @@ always_comb begin
             end else if(invalid_req) begin
                 AR_VALID      = 1;
                 make_unique_o = 1;
-                if(!AR_READY) begin
-                    next_state = RADDR;
-                end else begin
-                    next_state = IDLE;
-                    ace_ready  = 1;
-                end
+                next_state    = RADDR;
             end else if(AC_VALID) begin
                 next_state = CHECK_SNOOP;
                 ac_enable  = 1;
@@ -178,7 +173,7 @@ always_comb begin
             end
         end
         WDATA: begin
-            W_VALID = 1; 
+            W_VALID =  1; 
 
             if(!W_READY) begin
                 next_state = WDATA;
@@ -187,7 +182,7 @@ always_comb begin
             end
         end
         BRESP: begin
-            B_READY       = 1;
+            B_READY = 1;
 
             if(!B_VALID) begin
                 next_state = BRESP;
@@ -195,7 +190,7 @@ always_comb begin
                 if(B_okay) begin
                     next_state = IDLE;
                     ace_ready  = 1;
-                end else if (!AW_READY) begin
+                end else if (!AR_READY) begin
                     next_state = WADDR;
                     AW_VALID   = 1;
                 end else begin
